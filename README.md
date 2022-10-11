@@ -1,20 +1,38 @@
-# rcell2.magick - Magick and Shiny tools for cytometry data
+# rcell2.magick - Magick and Shiny tools for cytometry from microscopy data
 
 This package provides:
 
 * magick-based functions to prepare tiled images of single cells, over imaging channels and time frames.
+  * It thus requires ImageMagick in your system.
 * Shiny apps to filter and annotate cytometry datasets graphically, with live image previews of the cells.
 
-rcell2's functionality is split into four packages:
+rcell2's full functionality is split into four packages:
 
 * The main rcell2 package offers functions to load Cell-ID's output to data.frames, and image manipulation based on EBImage. A development version of this package is available in the [`rcell.dev`](https://github.com/darksideoftheshmoo/rcell2/tree/rcell2.dev) branch.
-* Cell-ID, the image segmentation software, has been wrapped in the [`rcell.cellid`](https://github.com/darksideoftheshmoo/rcell2/tree/rcell2.cellid) package. It offers functions to run CellID from R, and an rmarkdown template showcasing advanced functionality.
-* The cell tiling and graphic filtering apps, built on R-Shiny and [magick](https://github.com/ropensci/magick), are available in the [`rcell.magick`](https://github.com/darksideoftheshmoo/rcell2/tree/rcell2.magick) package.
+* Cell-ID, the image segmentation software, has been wrapped in the [`rcell.cellid`](https://github.com/darksideoftheshmoo/rcell2/rcell2-cellid) package. It offers functions to run CellID from R, and an rmarkdown template showcasing advanced functionality.
+* The cell tiling and graphic filtering apps, built on R-Shiny and [magick](https://github.com/ropensci/magick), are available in the [`rcell.magick`](https://github.com/darksideoftheshmoo/rcell2-magick) package.
 * The [`rcell2.examples`](https://github.com/darksideoftheshmoo/rcell2.examples) package contains notebooks on general usage, and on several classification and analysis methods.
 
 This package is very well tested in baker's yeast data, and R version 4+.
 
 ## Main functions
+
+Brief description of what the package does, and how to use it.
+
+### Usage examples
+
+An Rmd notebook with minimal and detailed usage examples is available.
+
+It is included as an Rmarkdown template,
+and can also be opened in Rstudio with a convenience function:
+
+```r
+get_workflow_template_magick()
+```
+
+This will either copy or download and open a Rmarkdown notebook,
+with usage examples and brief explanations.
+
 
 ### Magick functions
 
@@ -47,13 +65,13 @@ The magick functions display single cell images from microscopy datasets. See:
 
 > tagCell
 
-# Installation
+## Installation
 
-## R Dependencies
+### R Dependencies
 
 Most of the dependencies are listed in the `DESCRIPTION` file, and should install automatically.
 
-## System dependencies
+### System dependencies
 
 Install `imagemagick` on your system; this is required by R's `magick` package. All the major operating systems are supported by ImageMagick. See: https://imagemagick.org/script/download.php
 
@@ -69,12 +87,12 @@ sudo pacman -S imagemagick
 
 For macOS see: https://imagemagick.org/script/download.php
 
-## Installing the package
+### Installing the package
 
-Install using `devtools`, directly from github repo:
+Install using `remotes`, directly from github repo:
 
 ```r
-devtools::install_github("darksideoftheshmoo/rcell2", ref = "rcell2.magick")
+remotes::install_github("darksideoftheshmoo/rcell2-magick")
 ```
 
 ---
