@@ -1,0 +1,505 @@
+---
+title: "rcell2.magick: Workflow Examples"
+author: "Nicolás Méndez"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float:
+      collapsed: false
+    toc_depth: 4
+    number_sections: false
+    smooth_scroll: false
+    code_folding: hide
+  pdf_document:
+    latex_engine: xelatex
+    toc: true
+    toc_depth: 4
+    number_sections: true
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+urlcolor: blue
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "output/renders") })
+bibliography: references.bib
+---
+
+<!-- Download a copy of this file with rcell2::get_workflow_template() -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      message = F, 
+                      # https://yihui.org/knitr/options/#chunk-options
+                      out.width = "100%")
+                      # https://stackoverflow.com/a/66753995
+                      # tidy.opts = list(width.cutoff = 60), tidy = TRUE)
+knitr::opts_knit$set(root.dir = here::here())  #, base.dir = here::here())
+
+# library(rcell2)  # this package you are checking out :)
+# library(rcell2.cellid)  # Advanced functionality: run CellID entirely in R.
+library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
+
+# library(magick)  # if you need it
+# library(utiles)  # if you need it, get this from: https://gitlab.com/naikymen/r_utils
+
+library(tidyverse)  # import numpy as np (?)
+```
+
+## Friendly reminders
+
+**READ THE README**.md at rcell2's GitHub repo.
+
+## Prepare data
+
+Run cellid using default parameters and configuration:
+
+* Default CellID segmentation parameters.
+* Image filenames in time-course experiment "format": `BF_Position001_time01.tif`
+* Use built-in CellID binary.
+
+Otherwise you may set your own by settin arguments in `rcell2.cellid::parameters_default()`.
+
+Requires `rcell2` and `rcell2.cellid`:
+
+```{r}
+# A script to run rcell2's shinyApp for filtering cell data
+# Set the appropriate paths and execute from the commandline (using Rscript) or from RStudio
+
+# This is convenient
+options(shiny.reactlog = TRUE)
+
+# Path to the images directory
+images.directory <- system.file("extdata/time_series_sample/", package = "rcell2.magick")
+```
+
+### Run Cell-ID
+
+This is optional if you have already run Cell-ID, 
+either by using the `rcell2.cellid` package, or 
+the other methods (command-line, V-CellID, etc.).
+
+Run Cell-ID from R, using the `rcell2.cellid` package:
+
+```{r}
+cellid.args <- 
+  rcell2.cellid::arguments(
+    path = images.directory, 
+    file.pattern = "^(BF|[A-Z]FP)_Position(\\d+)_time(\\d+).tif$", 
+    file.pattern.groups.order = c("ch", "pos", "t.frame")
+  )
+
+cellid.log <- rcell2.cellid::cell2(arguments = cellid.args)
+```
+
+### Load Cell-ID output
+
+You need only to point `rcell2.cellid::cell.load.alt` or `rcell2::load_cell_data`
+to the directory where images and the Cell-ID output are located.
+
+```{r}
+# Load "cell data" with cell.load.alt, instead of using load_cell_data.
+# The default integer ucids make nicer names later on.
+# cell_data <- rcell2::load_cell_data(images.directory)
+cell_data <- rcell2.cellid::cell.load.alt(images.directory)
+
+# Optionally: Use this dataset for testing
+# cell_data <- readRDS("data/image_samples/cell_data.RDS")
+
+# Get the table with single-cell measurements
+cdata <- cell_data$data
+
+# Extract image paths and channels from cell.data
+images <- cell_data$images
+```
+
+> The "c" in "cdata" stands for _cell_ data.
+
+### Load metadata
+
+Load "pdata":
+
+```{r}
+# It is a "metadata" dataframe we usually join to cdata by "position" and/or "t.frame",
+# which contains other experimental variables: simuli concentrations, notes, etc.
+pdata <- readr::read_csv(dir(images.directory, "pdata.csv", full.names = T))
+```
+
+> The "p" in "pdata" stands for microscope _position_ data.
+
+## Magick
+
+Usage examples for the `rcell2.cellid` package.
+
+Functions in this package rely extensively on the `magick` package,
+an interface to the _ImageMagick_ library.
+
+You must install ImageMagick in your system using your package-manager, 
+or by following instructions available here:
+
+* https://imagemagick.org/script/download.php
+
+### Simple usage examples
+
+A simple `magick` example:
+
+```{r}
+# Make a mosaic with random cellids from cdata:
+pics <- magickCell(cdata, images)
+pics
+```
+
+Note: by default RStudio will display magick images in the viewer pane.
+Use `magickForKnitr` and `knitr::include_graphics` to preview the images
+in this Rmd notebook:
+
+```{r}
+pics %>% magickForKnitr() %>% knitr::include_graphics()
+```
+
+<!-- See: -->
+<!-- * https://ropensci.org/blog/2017/11/07/magick-knitr/ -->
+<!-- * https://github.com/ropensci/magick/issues/114 -->
+<!-- * https://github.com/rstudio/rstudio/issues/2290 -->
+
+Other simple `magick` examples:
+
+```{r}
+# Return single images (as magick image vector):
+magickCell(cdata, images, 
+           return_single_imgs = T)
+```
+
+
+```{r}
+# Use a custom function to modify images:
+image_customize <- function(i){
+  magick::image_annotate(i, "Yeasts!", "center", color = "gold2", size = "15")
+}
+```
+
+
+```{r}
+magickCell(cdata, images, 
+           customize_images = T,
+           image_customize = image_customize
+           )
+```
+
+
+```{r}
+# List available channels
+images$channel %>% unique()
+```
+
+
+```{r}
+# Load two image channels, but customize them differently:
+magickCell(cdata, images, ch = c("BF.out", "yfp"),
+           normalize_images = c(F, T),
+           customize_images = c(T, F),
+           image_customize = image_customize
+)
+```
+
+### Advanced functions
+
+A strip:
+
+You may manipulate "cdata" (filter, arrange, etc.) in the standard ways,
+in order to produce strips for a single cell in time.
+
+The strips are sorted by "t.frame" by default, but it can be overriden. 
+
+```{r}
+cdata %>% arrange(ucid, t.frame) %>% group_by(ucid) %>% filter(n() == 2) %>% 
+  cellStrip(images, 
+            # Don't sort by time first
+            time_colum = NULL,
+            # Choose two channels
+            channels = c("BF", "yfp.out"),
+            # Normalize the first channel
+            normalize_images = c(T,F)
+            ) %>%
+  # Inlcude image in the notebook
+  magickForKnitr() %>% knitr::include_graphics()
+```
+
+Multiple strips (one per ucid):
+
+```{r}
+# Notice the plural in "cellStrips"
+pics <- cellStrips(cdata, images, n_ucids = 10,
+                   # Choose two channels
+                   ch = c("BF", "yfp.out"),
+                   # Normalize the first
+                   normalize_images = c(T,F)
+                   )
+
+# Choose one
+pics$`70000` %>% 
+  # Display it inline in a Rmd notebook
+  magickForKnitr() %>% knitr::include_graphics()
+```
+
+Tiles:
+
+```{r}
+# First produce the images
+magickCell(cdata, images,
+           # ch = c("BF.out", "YFP.out"),  # Check out using multiple channels
+           return_single_imgs = T) %>% 
+  # Then build a "tile"
+  square_tile(nCol = 9) %>%
+  # Display it inline in a Rmd notebook
+  magickForKnitr() %>% knitr::include_graphics()
+```
+
+Make a nice 2D plot, showing random cells on each bin of the variable pair:
+
+```{r}
+pics <- 
+  cellSpread(cdata, images, xvar = "a.tot", yvar = "el.p", 
+             # Either set "for_plotting" to FALSE here, or select "pics$cell_tiles" later.
+             for_plotting = F)
+
+pics %>%
+  # Display it inline in a Rmd notebook
+  magickForKnitr() %>% knitr::include_graphics()
+```
+
+Make a 2D plot, binned by selected variables, displaying a sample cell in each 2D bin:
+
+```{r}
+plts <- cellSpreadPlot(cdata, images, xvar = "a.tot", yvar = "el.p",
+                       x.cuts = 7,
+                       y.cuts = 5)
+
+# This is a ggplot object :)
+plts$BF.out + ggtitle("This is a ggplot object!")
+```
+
+### Exported utils
+
+Add a border on only one side of the image:
+
+```{r}
+pic <- magickCell(cdata, images, 
+                  return_single_imgs = T, 
+                  n.cells = 1)
+
+image_border_one(pic) %>%
+  # Display it inline in a Rmd notebook
+  magickForKnitr() %>% knitr::include_graphics()
+```
+
+> Useful to add titles!
+
+## Shiny Apps
+
+The package offers three R-Shiny apps to handle single-cell microscopy data:
+
+* `shinyCell`: graphical filtering tool with image previws.
+* `tagCell`: graphical cell annotation tool with image previws.
+* `plotApp`: graphical filtering of the data in a ggplot object.
+
+### Preview and filter: shinyCell
+
+With this app, you may:
+
+* plot cells and preview cell images by hovering,
+* preview and/or filter cells with square areas (click and hold) or with custom polygons.
+
+Construct polygons one point at a time, by double clicking the plot. A single click will erase the polygon.
+
+Filtering logic is documented in the function's help page: `?shinyCell`.
+
+> Note: oyu may want to test if Shiny works in your computer beforehand, using `shiny::runExample("01_hello")`.
+
+```{r}
+result <- shinyCell(cdata, paths = images)
+
+# Devuelve cdata con una columna nueva "filter",
+# que dice cuales celulas pasaron el filtrado (TRUE) y cuales no (FALSE).
+result$cdata$filter
+
+# Lista de data.frames, con las coordenadas de cada region dibujada
+# sus variables, y el "tipo" de filtro que era.
+result$filters
+```
+
+The filters can be plotted using `plot_filters`:
+
+```{r}
+plots <- plot_filters(result)
+```
+
+You can filter cdata by the `filter` column to remove the filtered cells:
+
+```{r}
+cdata.filtered <- result$cdata %>% filter(filter)
+
+plots <- plot_filters(saved_data = 
+                        list(cdata = cdata.filtered, 
+                             filters = result$filters))
+```
+
+**Experimental**: use poly filter apply to reuse polygon lists on new cdata.
+
+```{r}
+result2 <- rcell2.magick:::polyFilterApply(
+  polygon_df_list = result$filters,
+  cdata = cdata %>% mutate(ucid_frame = paste(ucid, t.frame, sep = "_")),
+  truthMode = "all", 
+  cell_unique_id_field = "ucid_frame" # important for time series
+  )
+```
+
+### Annotate or tag cells: tagCell
+
+This app will display the images of one time frame of a cell,
+and provides a menu to "annotate" relevant charachteristics 
+associated to it.
+
+The menu is derived from the `cell_tags` arguments; a list that and defines the annotations and categories relevant to the user's dataset (see example below).
+
+Below a variable from `cdata` is plotted against the available 
+time frames for that cell. This plot is clickable, which is 
+useful to navigate the time course of one cell. It also displays
+any active annotations for the current cell.
+
+At the bottom, a strip is shown for the current cell, sorted by time frame.
+This strip is limited to a certain number of frames, and can be tuned with `max.frames`.
+
+There are several options to tune image sizes, the plot, images channels, and so on.
+
+```{r}
+tags <- tagCell(cdata, paths = images,
+                # Smaller main image view
+                cell_resize = 200, 
+                # Cell tags for the dataset
+                cell_tags = list(
+                  class = c("normal", "shmoo", "dead"),
+                  type = c("cell", "ghost")
+                ))
+
+tags
+```
+
+### Plot and preview: plotApp
+
+This app accepts a ggplot plot, and allows the user to filter the data,
+based on a single rectangular selection.
+
+Frist generate a plot:
+
+```{r}
+plt <- ggplot(cdata) + 
+  geom_point(aes(xpos, ypos))
+
+plt
+```
+
+And then pass the plot to `plotApp`:
+
+```{r}
+selected.cdata <- plotApp(plt)
+
+selected.cdata
+```
+
+> A much simpler version of `shinyCell`.
+
+## Extra
+
+Experimental tools.
+
+### Read a TIFFs section
+
+Using "raster" or "terra" to read a range from TIFF files would improve the 
+speed of theiamge handling significantly. However, this dependency is huge.
+
+`raster` may be faster in some cases. Note that `rgeos` and `rgdal` [will be superseeded](https://r-spatial.org//r/2022/04/12/evolution.html) by other packages in late 2023. Both seem to use the same C library back-end.
+
+Example using `raster``: https://stackoverflow.com/a/50851716
+
+Read all TIFFs as a "stack":
+
+```{r}
+images.directory <- system.file("extdata/time_series_sample/", package = "rcell2.magick")
+files <- dir(images.directory, pattern = "*.tif$", full.names = T)
+
+rs.r <- raster::stack(files)
+rs.t <- terra::rast(files)
+```
+
+
+Get the first:
+
+```{r}
+i.t <- rs.t[[1]]
+files[1]
+i.t
+```
+
+Get values for a square region:
+
+* Read a block with starting corner at pixel 500:500, and size 200x200.
+
+```{r}
+# The raster way
+vals.r <-
+  as.matrix(raster::getValuesBlock(x = rs.r[[1]],
+                                   row=500, nrows=200,
+                                   col=500, ncols=200))
+# The terra way
+vals.t <- 
+  terra::values(x = rs.t[[1]], 
+                row=500, nrows=200,
+                col=500, ncols=200)
+
+# They are equivalent
+all(vals.t == vals.r)
+
+# Use one:
+i.vals <- i.vals.t
+```
+
+
+```{r}
+# This matrix is read as in ImageJ when transposed
+i.mat1 <- matrix(i.vals, ncol = 200)
+t(i.mat1)[1:10, 1:10]
+
+# This matrix is read as in ImageJ "as is"
+i.mat2 <- matrix(i.vals, ncol = 200, byrow = T)
+i.mat2[1:10, 1:10]
+```
+
+Display the first matrix using `image`:
+
+```{r}
+# Display using "image", reversing the Y-axis so it shows as in ImageJ.
+image(i.mat1, ylim = c(1,0))
+
+# Equivalent, using an X-Y coordinate grid for each pixel,
+# the matrix as values, and a reversed Y-axis once more.
+image(x = 1:200, y = 1:200, z = i.mat1, ylim = c(200,1))
+# The latter produces the more expected pixel coordinates.
+
+# Using gray-scale:
+image(x = 1:200, y = 1:200, z = i.mat1, ylim = c(200,1), col=gray.colors(n=max(i.vals)))
+```
+
+To display the first matrix using `image`, transpose it first:
+
+```{r}
+# Display using "image", reversing the Y-axis so it shows as in ImageJ.
+image(t(i.mat2), ylim = c(1,0))
+
+# Equivalent, using an X-Y coordinate grid for each pixel,
+# the matrix as values, and a reversed Y-axis once more.
+image(x = 1:200, y = 1:200, z = t(i.mat2), ylim = c(200,1))
+# The latter produces the more expected pixel coordinates.
+
+# Using gray-scale:
+image(x = 1:200, y = 1:200, z = t(i.mat2), ylim = c(200,1), col=gray.colors(n=max(i.vals)))
+```

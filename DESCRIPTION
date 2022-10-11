@@ -1,0 +1,48 @@
+Package: rcell2.magick
+Title: R tools for analyzing cytometry data from microscopy images, based on R-Shiny ImageMagick.
+Version: 0.0.3
+Authors@R: 
+    c(person(given = "German",
+           family = "Beldorati Stark",
+           role = c("aut"),
+           email = "gerbeldo@gmail.com"),
+      person(given = "Nicolás",
+           family = "Agustín Méndez",
+           role = c("aut", "cre"),
+           email = "nmendez.ar@gmail.com"))
+Description: Analyse cellID data in the tidyverse framework. This package also has utility functions to generate, filter and preview data 
+    from fluorescence microscopy experiments (and maybe general cell cytometry).
+    It is meant as a successor to the older RCell package.
+    This package includes the CellID program source, and wraps it in a single R function.
+    Also included are the tools to process CellID output (from tidyCell).
+    Finally, a R-Shiny app will help users filter data graphically, with previews.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.1
+Depends:
+    R (>= 3.6)
+biocViews:
+Imports:
+    tibble,
+    dplyr,
+    IRanges,
+    sp,
+    tidyr,
+    ggplot2,
+    magick,
+    foreach,
+    shiny,
+    hexbin,
+    shinydashboard,
+    formattable,
+    grDevices,
+    reshape2,
+    readr,
+    shinyjs,
+    rlang,
+    data.table,
+    keys
+Suggests: 
+    tidyverse,
+    skimr
