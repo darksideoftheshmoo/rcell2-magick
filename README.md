@@ -2,8 +2,8 @@
 
 This package provides:
 
-* magick-based functions to prepare tiled images of single cells, over imaging channels and time frames.
-  * It thus requires ImageMagick in your system.
+* `magick`-based functions to prepare tiled images of single cells, over imaging channels and time frames.
+  * It requires [ImageMagick](https://imagemagick.org/script/download.php) in your system.
 * Shiny apps to filter and annotate cytometry datasets graphically, with live image previews of the cells.
 
 rcell2's full functionality is split into four packages:
@@ -13,7 +13,7 @@ rcell2's full functionality is split into four packages:
 * The cell tiling and graphic filtering apps, built on R-Shiny and [magick](https://github.com/ropensci/magick), are available in the [`rcell.magick`](https://github.com/darksideoftheshmoo/rcell2-magick) package.
 * The [`rcell2.examples`](https://github.com/darksideoftheshmoo/rcell2.examples) package contains notebooks on general usage, and on several classification and analysis methods.
 
-This package is very well tested in baker's yeast data, and R version 4+.
+This package suite is very well tested in baker's yeast data, and R version 4+.
 
 ## Main functions
 

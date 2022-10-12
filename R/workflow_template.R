@@ -20,7 +20,7 @@ get_workflow_template_magick <- function(
   if(file.exists(workflow.file)){
     file.copy(from = workflow.file, to = file_name)
   } else {
-    download.file(url = paste0("https://raw.githubusercontent.com/darksideoftheshmoo/rcell2/rcell2.magick/",
+    download.file(url = paste0("https://raw.githubusercontent.com/darksideoftheshmoo/rcell2-magick/main/",
                                "inst/rmarkdown/templates/rmd_template.magick/skeleton/skeleton.Rmd"), 
                   destfile = file_name)
   }
