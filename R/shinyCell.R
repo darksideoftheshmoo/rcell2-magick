@@ -48,6 +48,7 @@ safe_select <- function(.df, .name){
 #' @param filter_progress_file Path to an RDS file, used for saving filtering progress (in case something goes wrong). Using FALSE disables this feature. Set to NULL (the default) to let tempfile() choose a path for the RDS, or set to a valid path of your choice.
 #' @param launch.browser Set to \code{'firefox'} or equivalent to launch the app in-browser (\code{FALSE} by default). Useful when launching fails with error \code{Error in utils::browseURL(appUrl)} or similar.
 #' @param skip_input_check If FALSE (default)
+#' @param debug_msgs If FALSE (default) all internal output will be captured. Set to TRUE to print all messages, useful for debugging
 #' @param ... Further arguments passed to \code{\link{magickCell}}.
 #' @return A named list with the original cdata and a list of filters. The cdata includes an extra "filter" column, indicating if a row is to be kept (TRUE) or filtered out (FALSE). The list of filters can be passed as a filter argument, and can be plotted with \code{plot_filters}.
 #' @examples
@@ -92,6 +93,7 @@ shinyCell <- function(cdata,
                       filter_progress_file = NULL,
                       launch.browser = F,
                       skip_input_check = F,
+                      debug_msgs = F,
                       ...){
   
   if(!skip_input_check){
@@ -112,7 +114,7 @@ shinyCell <- function(cdata,
   
   if(is.null(filter_progress_file)) {
     filter_progress_file <- tempfile(pattern = "shinyCell_progress", fileext = ".RDS")
-    print(paste("-- Saving filter progress to temporary file:", filter_progress_file))
+    message(paste("-- Saving filter progress to temporary file:", filter_progress_file))
   }
     
   # To-do
@@ -132,27 +134,47 @@ shinyCell <- function(cdata,
   # shinyAppUI() is also defined as a function that returns a "fluidPage" object,
   # and thus suffers from the same problem as shinyAppServer()
   environment(shinyAppUI) <- environment()
-
+  
   # Taken from example at Rbloggers
   # https://github.com/MangoTheCat/shinyAppDemo/blob/master/R/launchApp.R
   # Here shinyAppUI() must be executed in order to pass a fluidPage object to shinyApp/runApp
   if(!isFALSE(launch.browser)) {
+    # Backup current setting
     default_browser <- getOption("browser")
+    # Apply the users setting
     options(browser = launch.browser)
-    
-    saved <- shiny::runApp(list(ui = shinyAppUI(), 
-                                server = shinyAppServer), 
-                           launch.browser = T)
-    options(browser = default_browser)
+    # Run shinyCell, 
+    # and restore setting even if it failed.    
+    tryCatch(
+      expr = {
+        if(debug_msgs){
+          saved <- shiny::runApp(list(ui = shinyAppUI(), 
+                                      server = shinyAppServer), 
+                                 launch.browser = T)
+        } else capture.output({
+          saved <- shiny::runApp(list(ui = shinyAppUI(), 
+                                      server = shinyAppServer), 
+                                 launch.browser = T)
+        })
+      }, finally = {
+        # Restore original setting
+        options(browser = default_browser)
+      })
     
   } else {
-    saved <- shiny::runApp(list(ui = shinyAppUI(), 
-                                server = shinyAppServer))
+    # Run shiny cell
+    if(debug_msgs){
+      saved <- shiny::runApp(list(ui = shinyAppUI(), 
+                                  server = shinyAppServer))
+    } else capture.output({
+      saved <- shiny::runApp(list(ui = shinyAppUI(), 
+                                  server = shinyAppServer))
+    })
   }
 
 
   # Imprimir cosas antes de cerrar la app
-  print("Chau! returning 'invisible' results...")
+  cat("Done! returning results invisibly.")
   
   # Append progress file path
   if(!isFALSE(filter_progress_file)) saved$filter_progress_file <- filter_progress_file

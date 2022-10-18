@@ -21,13 +21,14 @@ shinyCell(
   filter_progress_file = NULL,
   launch.browser = F,
   skip_input_check = F,
+  debug_msgs = F,
   ...
 )
 }
 \arguments{
-\item{cdata}{A Rcell "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}).}
+\item{cdata}{A Rcell "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
-\item{paths}{A "paths" data.frame, with paths to each positions' images (i.e. \code{cell.data$images}).}
+\item{paths}{A "paths" data.frame, with paths to each positions' images (i.e. \code{cell.data$images}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{pdata}{An optional "pdata" data.frame, with positions' metadata (NULL by default).}
 
@@ -52,6 +53,8 @@ shinyCell(
 \item{launch.browser}{Set to \code{'firefox'} or equivalent to launch the app in-browser (\code{FALSE} by default). Useful when launching fails with error \code{Error in utils::browseURL(appUrl)} or similar.}
 
 \item{skip_input_check}{If FALSE (default)}
+
+\item{debug_msgs}{If FALSE (default) all internal output will be captured. Set to TRUE to print all messages, useful for debugging}
 
 \item{...}{Further arguments passed to \code{\link{magickCell}}.}
 }

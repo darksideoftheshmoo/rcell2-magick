@@ -34,14 +34,14 @@ knitr::opts_chunk$set(echo = T,
                       # tidy.opts = list(width.cutoff = 60), tidy = TRUE)
 knitr::opts_knit$set(root.dir = here::here())  #, base.dir = here::here())
 
+library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
 # library(rcell2)  # this package you are checking out :)
 # library(rcell2.cellid)  # Advanced functionality: run CellID entirely in R.
-library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
 
-# library(magick)  # if you need it
-# library(utiles)  # if you need it, get this from: https://gitlab.com/naikymen/r_utils
 
 library(tidyverse)  # import numpy as np (?)
+library(shiny)
+library(magick)
 
 # This is useful for debugging
 # options(shiny.reactlog = TRUE)
@@ -58,7 +58,7 @@ The example requires microscopy images to work.
 Set the location of your image set (if you have one already):
 
 ```{r}
-# data.dir <- "/path/to/your/data"
+data.dir <- "/path/to/your/data"
 ```
 
 Otherwise, until you get you own, you may get sample images from the `rcell2.examples` package.
@@ -77,7 +77,7 @@ if(!require(rcell2.examples)){
 }
 
 # Or use the example images
-data.dir <- system.file("extdata/sample_datasets/time_series_sample/",
+data.dir <- system.file("extdata/sample_datasets/sample_time_series/",
                         package = "rcell2.examples")
 ```
 
