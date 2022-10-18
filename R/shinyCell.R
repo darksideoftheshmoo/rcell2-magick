@@ -34,8 +34,8 @@ safe_select <- function(.df, .name){
 #' The filtering logic in the "Filter mode" setting is documented and implemented in \code{\link{polyFilterApply}}.
 #' Briefly, it defines the priority of Subtractive and Additive filters: which of them should override the other?
 #'
-#' @param cdata A Rcell "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}).
-#' @param paths A "paths" data.frame, with paths to each positions' images (i.e. \code{cell.data$images}).
+#' @param cdata A Rcell "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
+#' @param paths A "paths" data.frame, with paths to each positions' images (i.e. \code{cell.data$images}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
 #' @param pdata An optional "pdata" data.frame, with positions' metadata (NULL by default).
 #' @param filters An optional list with the filters from a previous shinyCell run (dataframes with points of 2D polygons). An empty \code{list()} by default.
 #' @param plotType Type of the filtering plot, either: "Dots" (point scatterplot, defaut), "Hex" (2D histogram with hexagonal bins), "Density", "Pics" (a \code{cellSpread} plot).
