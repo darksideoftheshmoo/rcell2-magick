@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo = T,
                       # tidy.opts = list(width.cutoff = 60), tidy = TRUE)
 knitr::opts_knit$set(root.dir = here::here())  #, base.dir = here::here())
 
-library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
+# library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
 # library(rcell2)  # this package you are checking out :)
 # library(rcell2.cellid)  # Advanced functionality: run CellID entirely in R.
 
@@ -356,12 +356,6 @@ result$cdata$filter
 result$filters
 ```
 
-The filters can be plotted using `plot_filters`:
-
-```{r}
-plots <- plot_filters(result)
-```
-
 You can filter cdata by the `filter` column to remove the filtered cells:
 
 ```{r}
@@ -372,15 +366,27 @@ plots <- plot_filters(saved_data =
                              filters = result$filters))
 ```
 
-**Experimental**: use poly filter apply to reuse polygon lists on new cdata.
+The filters can be plotted using `plot_filters`:
 
 ```{r}
-result2 <- rcell2.magick:::polyFilterApply(
-  polygon_df_list = result$filters,
-  cdata = cdata %>% mutate(ucid_frame = paste(ucid, t.frame, sep = "_")),
-  truthMode = "all", 
-  cell_unique_id_field = "ucid_frame" # important for time series
-  )
+plots <- plot_filters(result)
+```
+
+You can use `apply_filters` to reuse previous polygon lists on new cdata.
+
+```{r}
+result2 <- apply_filters(cdata,  # The new cdata would go here!
+                         filters = result$filters)
+```
+
+Re-plot, updating the data on the scatterplot layer of the plot:
+
+```{r}
+# Update plots
+lapply(plots, function(plt){
+  plt$layers[[1]]$data <- result2
+  return(plt)
+})
 ```
 
 ### Annotate or tag cells: tagCell

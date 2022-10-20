@@ -110,6 +110,64 @@ getPositions <- function(input, numPos){
 
 # POLY FILTER FUNCTIONS ####
 
+
+      
+
+#' Apply shiny-filters to cdata
+#' 
+#' @param filters A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")
+#' @param cell_unique_id_field Verctor with the names of the columns which uniquely identify each observation (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).
+#' @inheritParams polyFilterApply
+#' @inheritParams magickCell
+#' 
+#' @export
+#' 
+apply_filters <- function(cdata, 
+                          filters, 
+                          unique_id_fields=c("ucid", "t.frame"),
+                          truthMode = "all"){
+  # Create the PK's name
+  cell_unique_id_field <- paste(unique_id_fields, collapse = "_")
+  
+  # Check if names are in cdata
+  if(!all(unique_id_fields %in% names(cdata))) 
+    stop(paste0(
+      "\napply_filters: error, the following id_fields were not found in cdata: '",
+      paste(unique_id_fields[!unique_id_fields %in% names(cdata)], collapse = "', '"),
+      "'\n"
+    ))
+  
+  # Test if the ID column is already present
+  test <- cell_unique_id_field %in% cdata
+  if(test){
+    # Use it in that case
+    message(paste("\nThe", cell_unique_id_field, "already exists in cdata. Using it as a primary key."))
+  } else {
+    # Else create it from unique_id_fields
+    cdata[[cell_unique_id_field]] <- apply(cdata, 1, function(d) 
+      paste(d[unique_id_fields], collapse = "_")
+    )
+  }
+  
+  # Apply the filters
+  capture.output({
+    result <- polyFilterApply(polygon_df_list = filters, 
+                              cdata = cdata,
+                              truthMode = truthMode,
+                              cell_unique_id_field = cell_unique_id_field
+    )
+  })
+  
+  # Save the filtered cdata
+  result.cdata <- result$cdata[result$cdata$filter, ]
+  
+  # Remove the ID column if it was not present
+  if(!test) result.cdata[[cell_unique_id_field]] <- NULL
+  
+  # Chin-pum!
+  return(result.cdata)
+}
+
 #' Apply polygonal filters to cdata
 #' 
 #' Adds a boolean "filter" column to the "cdata" dataframe, based on a polygon list (typically output by shinyCell).
