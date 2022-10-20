@@ -613,7 +613,7 @@ tagCellServer <- function(input, output, session) {
     if(nrow(table_output) > 0){
       table_output <- separate(table_output, ucid_t.frame, c("ucid", "t.frame")) %>% 
         mutate(ucid = as.integer(ucid), t.frame = as.integer(t.frame)) %>% 
-        left_join(unique(select(d, ucid, pos, cellID)))
+        left_join(unique(select(d, ucid, pos, cellID)), by = "ucid")
     } else {
       table_output <- data.frame(message = "No annotations yet...")
     }
@@ -803,7 +803,7 @@ tagCellServer <- function(input, output, session) {
       table_output <- separate(table_output, ucid_t.frame, c("ucid", "t.frame")) %>% 
         mutate(ucid = as.integer(ucid), 
                t.frame = as.integer(t.frame)) %>% 
-        left_join(id_data) %>% 
+        left_join(id_data, by = "ucid") %>% 
         filter(ucid == ith_ucid)
       
       table_output_longer <- table_output %>%
