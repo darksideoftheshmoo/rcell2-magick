@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo = T,
                       # tidy.opts = list(width.cutoff = 60), tidy = TRUE)
 knitr::opts_knit$set(root.dir = here::here())  #, base.dir = here::here())
 
-# library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
+library(rcell2.magick)  # Advanced functionality: filter data using Shiny and preview images with Magick.
 # library(rcell2)  # this package you are checking out :)
 # library(rcell2.cellid)  # Advanced functionality: run CellID entirely in R.
 
@@ -540,39 +540,4 @@ image(x = 1:200, y = 1:200, z = t(i.mat2), ylim = c(200,1))
 image(x = 1:200, y = 1:200, z = t(i.mat2), ylim = c(200,1), col=gray.colors(n=max(i.vals)))
 ```
 
-### Tests
-
-```{r}
-devtools::load_all()
-```
-
-
-```{r}
-# Or use the example images
-data.dir <- system.file("extdata/sample_datasets/sample_time_series/",
-                        package = "rcell2.examples")
-```
-
-
-```{r}
-# Load "cell data" with cell.load.alt, instead of using load_cell_data.
-# The default integer ucids make nicer names later on.
-# cell_data <- rcell2::load_cell_data(data.dir)
-cell_data <- rcell2.cellid::cell.load.alt(data.dir)
-
-# Optionally: Use this dataset for testing
-# cell_data <- readRDS("data/image_samples/cell_data.RDS")
-
-# Get the table with single-cell measurements
-cdata <- cell_data$data
-
-# Extract image paths and channels from cell.data
-images <- cell_data$images
-```
-
-```{r}
-devtools::load_all()
-
-result <- shinyCell(cdata, paths = images, initial_facet = "~pos+t.frame", debug_msgs = T)
-```
 
