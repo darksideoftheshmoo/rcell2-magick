@@ -162,30 +162,64 @@ polyFilterApply <- function(polygon_df_list,
 #' Build filterDF from polygonDF and cdataDF
 #' 
 #' @param cdataDF A "cdata" dataframe.
+#' @param filterDF A dataframe with one boolean column per polygon filter.
+#' @param polygonDF A dataframe with the poins of a polygon, and the variable associated with each coordinate.
+#' @param polygonName A prefix for the polygon name, posfixed by the filter type.
 #' 
 #' @keywords internal
 polyFilterCell <- function(cdataDF, filterDF, polygonDF, polygonName = 1){
-    print(paste("F4: polygon name:", polygonName))
-    # polygonDF is NULL
-
-    xvar <- polygonDF[1, "xvar", drop = T]
-    yvar <- polygonDF[1, "yvar", drop = T]
-
-    pips <- pip(points = cdataDF[,c(xvar, yvar)], pgn = polygonDF)
-
-    type <- polygonDF[1, "type"]  # Poolygon filter type, as chosen at the shiny app
-
-    if(type == "Additive") {
-        filterDF[, paste0(polygonName, "_", type)] <-  as.logical(pips)
-
-    } else if(type == "Subtractive") {
-        filterDF[, paste0(polygonName, "_", type)] <- !as.logical(pips)
-
-    } else {
-        print("F4: polygon name: Filter type not within polyFilterCell() options.")
+  print(paste("F4: polygon name:", polygonName))
+  # polygonDF is NULL
+  
+  # Check for filtering facets
+  facet_cols <- 1:ncol(polygonDF) > 5  # WARNING: THIS IS TIED TO THE NUMBER OF NON FACET COLUMNS IN 'make_filter_polygon_df'.
+  facet_vars <- names(polygonDF)[facet_cols]
+  # Start with all rows
+  cdataDF$facet_filter <- TRUE
+  # Mark rows in the faceting group as "TRUE" if they are in the facet
+  if(sum(facet_cols) > 0){
+    for(facet_var in facet_vars){
+      cdataDF$facet_filter <- cdataDF$facet_filter & (cdataDF[[facet_var]] == polygonDF[[facet_var]][1])
     }
+  }
+  
+  # Get polygon vars
+  xvar <- polygonDF[1, "xvar", drop = T]
+  yvar <- polygonDF[1, "yvar", drop = T]
+  
+  # Compute if observations are in the polygon
+  pips <- pip(points = cdataDF[,c(xvar, yvar)], pgn = polygonDF)
+  
+  # Get filter type
+  type <- polygonDF[1, "type"]  # Poolygon filter type, as chosen at the shiny app
+  
+  # Compute if a point is in the selection AND in the facet filter
+  is_in_group <- as.logical(pips) & cdataDF$facet_filter
+  
+  # Make the name of the current filtering polygon
+  filter_name <- paste0(polygonName, "_", type)
+  
+  # Add logic: a "TRUE" value indicates that the row should be kept.
+  if(type == "Additive") {
+      filterDF[, filter_name] <-  is_in_group  # in group  -> TRUE
 
-    return(filterDF)
+  } else if(type == "Subtractive") {
+      filterDF[, filter_name] <- !is_in_group  # out group -> TRUE
+
+  } else {
+      print("F4: polygon name: Filter type not within polyFilterCell() options.")
+  }
+  
+  return(filterDF)
+  
+  {  # Test plot (not run)
+    data1 <- cdataDF
+    data2 <- cdataDF[filterDF[, filter_name], ]
+    ggplot() +
+      geom_point(aes(a.tot, fft.stat), data = data1) +
+      geom_point(aes(a.tot, fft.stat), data = data2, color="red") +
+      facet_grid(t.frame~pos)
+  }
 }
 
 #' Polygon filtering function using "sp" package

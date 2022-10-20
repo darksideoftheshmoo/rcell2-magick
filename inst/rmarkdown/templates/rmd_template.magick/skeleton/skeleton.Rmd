@@ -576,3 +576,37 @@ devtools::load_all()
 result <- shinyCell(cdata, paths = images, initial_facet = "~pos+t.frame", debug_msgs = T)
 ```
 
+```{r}
+pgn <- read.csv("/tmp/brpts.csv")
+
+pgn[1] <- NULL
+
+pgn
+```
+
+```{r}
+polygon_df_list <- list(pgn)
+truthMode = "all"
+cell_unique_id_field = "ucid_time"
+unique_id_fields=c("ucid", "t.frame")
+cdata[[cell_unique_id_field]] <- apply(cdata, 1, function(d) 
+  paste(d[unique_id_fields], collapse = "_")
+)
+```
+
+```{r}
+
+cfilter <- data.frame(id = cdata[,cell_unique_id_field], 
+                      filter = TRUE)
+
+names(cfilter)[1] <- cell_unique_id_field
+
+debugonce(polyFilterCell)
+
+polyFilterCell(cdataDF = cdata, 
+               filterDF = cfilter, 
+               polygonDF = polygon_df_list[[1]],
+               polygonName = paste0("polygon", 1)
+               ) %>% View()
+```
+

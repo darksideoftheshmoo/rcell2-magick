@@ -798,6 +798,15 @@ shinyAppServer <-
             
             # Save polygon
             pgn <- brpts
+            
+            # Check column number
+            if(ncol(pgn) > 5) stop(paste0(
+              "Error: Facet filtering is based on column numbers (6 or greater), ",
+              "but more than 5 columns were found in the initial polygon data.frame. ",
+              "Remember to update 'polyFilterCell' before changing this check."
+            ))
+            # Add facetvars
+            for(x in panel_vars) pgn[[ facet_vars[[x]] ]] <- panel_vals[[x]]
 
             # Append the dataframe to the filters list
             filter_length <- length(rv$filters) + 1
@@ -816,6 +825,15 @@ shinyAppServer <-
             
             # Save polygon
             pgn <- pgnpts
+            
+            # Check column number
+            if(ncol(pgn) > 5) stop(paste0(
+              "Error: Facet filtering is based on column numbers (6 or greater), ",
+              "but more than 5 columns were found in the initial polygon data.frame. ",
+              "Remember to update 'polyFilterCell' before changing this check."
+            ))
+            # Add facetvars
+            for(x in panel_vars) pgn[[facet_vars[[x]]]] <- panel_vals[[x]]
 
             # Append the dataframe to the filters list
             filter_length <- length(rv$filters) + 1
