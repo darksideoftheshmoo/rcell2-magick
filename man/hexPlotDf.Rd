@@ -12,7 +12,7 @@ hexPlotDf(
 )
 }
 \arguments{
-\item{cdata}{A data.frame (tipically rcell's \code{cdata}).}
+\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{facetVars}{Charachter vector with the names of grouping variables (tipically in rcell's \code{pdata})}
 

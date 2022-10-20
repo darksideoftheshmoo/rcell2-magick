@@ -19,13 +19,13 @@ cellSpread(
 )
 }
 \arguments{
-\item{cdata}{A Rcell data.frame (not the object).}
+\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
-\item{paths}{A paths dataframe with file path, t.frame, position and channel information of each picture.}
+\item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{ch}{Name of the CellID channel (BF, BF.out, RFP, etc.). "BF.out" by default, use a vector to select more than one channel simultaneously (images will be stacked).}
 
-\item{boxSize}{Size of the box containing the individual cell images. 50 by default.}
+\item{boxSize}{Lateral size of the square box extracted from the original images (in pixels). 50 px by default.}
 
 \item{xvar, yvar}{Strings indicating names for the variables to plot in the horizontal (x) and vertical (y) axis.}
 

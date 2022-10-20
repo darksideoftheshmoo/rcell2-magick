@@ -29,15 +29,15 @@ magickCell(
 )
 }
 \arguments{
-\item{cdata}{A Rcell data.frame (not the object).}
+\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
-\item{paths}{A paths dataframe with file path, t.frame, position and channel information of each picture.}
+\item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{max_composite_size}{Maximum size of the final composite image (this resize is applied last) in pixels. 1000 by default.}
 
 \item{cell_resize}{Resize string for the individual cell images (\code{NULL} translates to \code{boxSize}x\code{boxSize} by default).}
 
-\item{boxSize}{Size of the box containing the individual cell images. 50 by default.}
+\item{boxSize}{Lateral size of the square box extracted from the original images (in pixels). 50 px by default.}
 
 \item{n.cells}{Maximum number of cells to display (integer, set to \code{NULL} to display all cells in \code{cdata}).}
 

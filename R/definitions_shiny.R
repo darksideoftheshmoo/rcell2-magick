@@ -4,7 +4,7 @@
 
 #' Find cell closest to hover point in shiny
 #' @param ui_input the "input" object from whiny server
-#' @param cdata the dataframe to filter
+#' @inheritParams magickCell
 #' @keywords internal
 hover_closest <- function(ui_input, cdata){
     d.closest <- sqrt(  
@@ -115,9 +115,9 @@ getPositions <- function(input, numPos){
 #' Adds a boolean "filter" column to the "cdata" dataframe, based on a polygon list (typically output by shinyCell).
 #' 
 #' @param polygon_df_list A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")
-#' @param cdata A "cdata" dataframe.
 #' @param truthMode Priority for "Subtractive" and "Additive" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (Subtractive overcomes Additive) or "any" (Additive overcomes Subtractive).
 #' @param cell_unique_id_field Name for the column holding the unique identifier (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).
+#' @inheritParams magickCell
 #' 
 #' @return a "saved_data" list object, where the cdata is appended a "filter" logical column.
 #' 
@@ -458,7 +458,7 @@ plot_bound_filters <- function(bound_filters){
 
 #' Armar data.frame para plots tipo HEXBIN con facets
 #'
-#' @param cdata A data.frame (tipically rcell's \code{cdata}).
+#' @inheritParams magickCell
 #' @param facetVars Charachter vector with the names of grouping variables (tipically in rcell's \code{pdata})
 #' @param varx Name of the x-axis variable.
 #' @param vary Name of the y-axis variable.

@@ -26,9 +26,9 @@ shinyCell(
 )
 }
 \arguments{
-\item{cdata}{A Rcell "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
-\item{paths}{A "paths" data.frame, with paths to each positions' images (i.e. \code{cell.data$images}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+\item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{pdata}{An optional "pdata" data.frame, with positions' metadata (NULL by default).}
 
@@ -46,7 +46,7 @@ shinyCell(
 
 \item{facets_scale_free}{Use ggplot's facets with fixed scales (NULL, default) or free scales ("free").}
 
-\item{boxSize}{Size in pixels for individual cells' images.}
+\item{boxSize}{Lateral size of the square box extracted from the original images (in pixels). 50 px by default.}
 
 \item{filter_progress_file}{Path to an RDS file, used for saving filtering progress (in case something goes wrong). Using FALSE disables this feature. Set to NULL (the default) to let tempfile() choose a path for the RDS, or set to a valid path of your choice.}
 
@@ -56,7 +56,27 @@ shinyCell(
 
 \item{debug_msgs}{If FALSE (default) all internal output will be captured. Set to TRUE to print all messages, useful for debugging}
 
-\item{...}{Further arguments passed to \code{\link{magickCell}}.}
+\item{...}{
+  Arguments passed on to \code{\link[=magickCell]{magickCell}}
+  \describe{
+    \item{\code{max_composite_size}}{Maximum size of the final composite image (this resize is applied last) in pixels. 1000 by default.}
+    \item{\code{cell_resize}}{Resize string for the individual cell images (\code{NULL} translates to \code{boxSize}x\code{boxSize} by default).}
+    \item{\code{n.cells}}{Maximum number of cells to display (integer, set to \code{NULL} to display all cells in \code{cdata}).}
+    \item{\code{equalize_images}}{Use magick's function to "equalize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).}
+    \item{\code{normalize_images}}{Use magick's function to "normalize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).}
+    \item{\code{customize_images}}{Use a custom magick-like function to "customize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).}
+    \item{\code{image_customize}}{A custom magick-like function to "customize" the channels specified in \code{customize_images}. Defaults to NULL (disabled).}
+    \item{\code{ch}}{Name of the CellID channel (BF, BF.out, RFP, etc.). "BF.out" by default, use a vector to select more than one channel simultaneously (images will be stacked).}
+    \item{\code{sortVar}}{Variable name used to sort the rows (after sampling if a \code{seed} was specified). NULL by default, to skip sorting.}
+    \item{\code{.debug}}{Print more messages if TRUE.}
+    \item{\code{return_single_imgs}}{If TRUE, return a vector of images instead of a tile.}
+    \item{\code{return_ucid_df}}{If TRUE, return is a list of magick images and ucid dataframes.}
+    \item{\code{annotation_params}}{Set to NULL to skip annotations, or a named list with values for magick::annotate options (one or more of the names "color" "background" "size"). Note that size close to zero can be invisible.}
+    \item{\code{add_border}}{Add a 1x1 border to the pictures. Useful for stacking/appending.}
+    \item{\code{stack_vertical_first}}{Set to TRUE to stack images vertically first (useful when \code{return_single_imgs = T}).}
+    \item{\code{return_raw}}{Returns loaded images prematurely (i.e. without any processing other than magick::image_read and magick::image_crop).}
+    \item{\code{crop_images}}{Whether to crop images to a box centered on the cell's XY position (TRUE, default), or the full image (FALSE).}
+  }}
 }
 \value{
 A named list with the original cdata and a list of filters. The cdata includes an extra "filter" column, indicating if a row is to be kept (TRUE) or filtered out (FALSE). The list of filters can be passed as a filter argument, and can be plotted with \code{plot_filters}.

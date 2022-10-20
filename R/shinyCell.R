@@ -34,8 +34,7 @@ safe_select <- function(.df, .name){
 #' The filtering logic in the "Filter mode" setting is documented and implemented in \code{\link{polyFilterApply}}.
 #' Briefly, it defines the priority of Subtractive and Additive filters: which of them should override the other?
 #'
-#' @param cdata A Rcell "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
-#' @param paths A "paths" data.frame, with paths to each positions' images (i.e. \code{cell.data$images}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
+#' @inheritParams magickCell
 #' @param pdata An optional "pdata" data.frame, with positions' metadata (NULL by default).
 #' @param filters An optional list with the filters from a previous shinyCell run (dataframes with points of 2D polygons). An empty \code{list()} by default.
 #' @param plotType Type of the filtering plot, either: "Dots" (point scatterplot, defaut), "Hex" (2D histogram with hexagonal bins), "Density", "Pics" (a \code{cellSpread} plot).
@@ -44,12 +43,12 @@ safe_select <- function(.df, .name){
 #' @param initial_vars Initial cdata variables as a character vector (defaults to \code{c('a.tot', 'fft.stat')}).
 #' @param facet_grid_option Use ggplot's facet_grid (TRUE, default) or facet_wrap (FALSE).
 #' @param facets_scale_free Use ggplot's facets with fixed scales (NULL, default) or free scales ("free").
-#' @param boxSize Size in pixels for individual cells' images.
 #' @param filter_progress_file Path to an RDS file, used for saving filtering progress (in case something goes wrong). Using FALSE disables this feature. Set to NULL (the default) to let tempfile() choose a path for the RDS, or set to a valid path of your choice.
 #' @param launch.browser Set to \code{'firefox'} or equivalent to launch the app in-browser (\code{FALSE} by default). Useful when launching fails with error \code{Error in utils::browseURL(appUrl)} or similar.
 #' @param skip_input_check If FALSE (default)
 #' @param debug_msgs If FALSE (default) all internal output will be captured. Set to TRUE to print all messages, useful for debugging
 #' @param ... Further arguments passed to \code{\link{magickCell}}.
+#' @inheritDotParams magickCell
 #' @return A named list with the original cdata and a list of filters. The cdata includes an extra "filter" column, indicating if a row is to be kept (TRUE) or filtered out (FALSE). The list of filters can be passed as a filter argument, and can be plotted with \code{plot_filters}.
 #' @examples
 #' 
