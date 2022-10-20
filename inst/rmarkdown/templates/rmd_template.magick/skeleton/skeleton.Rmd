@@ -93,16 +93,20 @@ This is optional if you have already run Cell-ID,
 either by using the `rcell2.cellid` package, or 
 the other methods (command-line, V-CellID, etc.).
 
-Run Cell-ID from R, using the `rcell2.cellid` package:
+Generate arguments:
 
-```{r}
+```{r eval=F}
 cellid.args <- 
   rcell2.cellid::arguments(
     path = data.dir, 
     file.pattern = "^(BF|[A-Z]FP)_Position(\\d+)_time(\\d+).tif$", 
     file.pattern.groups.order = c("ch", "pos", "t.frame")
   )
+```
 
+Run Cell-ID:
+
+```{r eval=F}
 cellid.log <- rcell2.cellid::cell2(arguments = cellid.args)
 ```
 
