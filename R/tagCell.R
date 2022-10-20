@@ -109,7 +109,7 @@ tagCell <- function(cdata,
   )
   
   # Debug message level
-  stopifnot(verbose %in% 0:2)
+  if(!all(verbose %in% 0:2)) stop("tagCell: error, verbose level must be 0, 1 or 2.")
   switch (verbose+1,
           {
             runtime_messages <- F
