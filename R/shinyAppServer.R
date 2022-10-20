@@ -56,6 +56,17 @@ shinyAppServer <-
       saved <- list()
       print("Initialization done!")
     }
+    
+    # Handy functions ####
+    make_filter_polygon_df <- function(x, y, xvar, yvar, type){
+      brpts <- data.frame(x = x,
+                          y = y,
+                          xvar = xvar,
+                          yvar = yvar,
+                          type = type,
+                          stringsAsFactors = F)
+      return(brpts)
+    }
 
     ### FILTER TAB OBSERVER ###
     {
@@ -692,25 +703,27 @@ shinyAppServer <-
           
           # Load all polygons
           pgnpts <- isolate(rv$pgnpts)  # will fire on click, isolation is prudent
-
+          
+          # Make df with the new polygon point
+          new_pgnpts <- make_filter_polygon_df(x = isolate(input$vertex1$x),
+                                               y = isolate(input$vertex1$y),
+                                               xvar = isolate(input$x),
+                                               yvar = isolate(input$y),
+                                               # Filter type will be overwritten when the add filter button is pressed
+                                               type = input$filter_type,
+                                               stringsAsFactors = F)
+          
           # Add a new row with the new point
           if(nrow(pgnpts) == 0){
-            pgnpts <- data.frame(x = isolate(input$vertex1$x),
-                                 y = isolate(input$vertex1$y),
-                                 xvar = isolate(input$x),
-                                 yvar = isolate(input$y),
-                                 stringsAsFactors = F)
+            # Either create the dataframe
+            pgnpts <- new_pgnpts
           } else {
-            pgnpts <- bind_rows(pgnpts,
-                                data.frame(x = isolate(input$vertex1$x),
-                                           y = isolate(input$vertex1$y),
-                                           xvar = isolate(input$x),
-                                           yvar = isolate(input$y),
-                                           stringsAsFactors = F))
+            # Or bind the new point to the others
+            pgnpts <- bind_rows(pgnpts, new_pgnpts)
           }
-
+          
+          # Update the reactive object
           rv$pgnpts <- pgnpts
-
 
         }, label = "Click observer 1")
 
@@ -772,17 +785,16 @@ shinyAppServer <-
             print("-- Brush by facet (for filtering) mode OFF")
           }
 
-          # Brush
+          # Add polygon from Brush
           brush <- isolate(input$scatterplot_brush)
           if(!is.null(brush$xmin)){
             print("-- Brush mode ON")
             brpts <- square(brush$xmin, brush$ymin, brush$xmax, brush$ymax)
-            brpts <- data.frame(x = brpts$x,
-                                y = brpts$y,
-                                xvar = isolate(input$x),
-                                yvar = isolate(input$y),
-                                type = input$filter_type,
-                                stringsAsFactors = F)
+            brpts <- make_filter_polygon_df(x = brpts$x,
+                                            y = brpts$y,
+                                            xvar = isolate(input$x),
+                                            yvar = isolate(input$y),
+                                            type = input$filter_type)
             
             # Save polygon
             pgn <- brpts
@@ -794,23 +806,26 @@ shinyAppServer <-
             print("-- Brush empty, no filter created from brush.")
           }
 
-          # Polygon
+          # Add filter from Polygon
           pgnpts <- rv$pgnpts
           if(nrow(pgnpts) >= 3){
             print("-- Polygon mode ON")
-            pgn <- cbind(pgnpts, data.frame(type = input$filter_type, stringsAsFactors = F))
+            
+            # Update type to current value of the option
+            pgnpts$type <- input$filter_type
+            
+            # Save polygon
+            pgn <- pgnpts
 
             # Append the dataframe to the filters list
             filter_length <- length(rv$filters) + 1
             rv$filters[[filter_length]] <- pgn  # This will fire FILTER TAB EVENTS OBSERVER
+            
           } else {
             print("-- Not enough points for polygon filter.")
           }
           
-          # Add facetvars
-          for(x in panel_vars) brpts[[facet_vars[[x]]]] <- panel_vals[[x]]
-          # write.csv(brpts, file = "/tmp/brpts.csv")
-
+          # Final check, and update checkbox.
           if (nrow(pgnpts) < 3 & is.null(brush$xmin)) {
             print("Incomplete or missing selection, ignoring button press.")
           } else {

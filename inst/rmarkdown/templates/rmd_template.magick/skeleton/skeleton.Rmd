@@ -356,6 +356,12 @@ result$cdata$filter
 result$filters
 ```
 
+The filters can be plotted using `plot_filters`:
+
+```{r}
+plots <- plot_filters(result)
+```
+
 You can filter cdata by the `filter` column to remove the filtered cells:
 
 ```{r}
@@ -364,12 +370,6 @@ cdata.filtered <- result$cdata %>% filter(filter)
 plots <- plot_filters(saved_data = 
                         list(cdata = cdata.filtered, 
                              filters = result$filters))
-```
-
-The filters can be plotted using `plot_filters`:
-
-```{r}
-plots <- plot_filters(result)
 ```
 
 You can use `apply_filters` to reuse previous polygon lists on new cdata.
