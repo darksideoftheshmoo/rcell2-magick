@@ -350,10 +350,23 @@ shinyAppServer <-
                   } else print("-- brush change by null (not updating)")  # Si el nuevo brush está vacío, no hacer nada.
 
                 } else print("-- no brush net change (not updating)")  # Si el nuevo brush es igual al anterior, no hacer nada.
-
+                
+                # Brush contents:
+                # 
+                # print("-- brush:")
+                # print(input$scatterplot_brush)
+                # print("--")
+                #                 
+                # print("-- brush panelvar1:")
+                # print(input$scatterplot_brush$panelvar1)
+                # print("--")
+                # 
+                # print("-- brush mapping:")
+                # print(input$scatterplot_brush$mapping$panelvar1)
+                # print("--")
+                
                 # Others
                 # n <- nrow(values$cdata) # ??? lo comenté porque ni idea que hacia
-
               })
 
 
@@ -722,6 +735,42 @@ shinyAppServer <-
 
           # Density 1D should be treated differently
           plot.type <- isolate(input$ptype)
+          
+          # Get facet ingo
+          panel_vars <- list()
+          # Si hay algo escrito en el facet formula field, filtrar el dataframe para mostrar solo las imagenes del facet seleccionado.
+          if(input$facet != "" && input$facet_brush){
+          # if(F){
+            print("-- Brush by facet (for filtering) mode ON")
+            
+            # Cada "eje" del facet tiene los posibles valores de una variable de pdata.
+            
+            # Primero conseguir las variables en la fórmula (debería estar primera la variable en el "eje y del facet")
+            facetVars <- all.vars(eval(parse(text=input$facet)))
+            facetVars <- facetVars[facetVars != "."]  # Sacar el puntito de las variables
+            facetVars <- rev(facetVars)  # Dar vuelta, porque necesito primero los X y después los Y.
+            
+            # Conseguir los valores de las variables del facet usando información del brush.
+            brush_names <- names(input$scatterplot_brush)       # Get names of stuff in the brush
+            panel_vars_index <- grep("panelvar", brush_names)   # Get indexes of the panelvars (facets)
+            panel_vars <- brush_names[panel_vars_index]         # Get the panelvars (panelvar1, panelvar2, etc.)
+            
+            # The good stuff:
+            # Get the names of the faceting variables (pos, treatment, t.frame, etc.)
+            facet_vars <- input$scatterplot_brush$mapping[panel_vars]
+            # Get the values of the faceting variables (0, "control", 12, etc.)
+            panel_vals <- input$scatterplot_brush[panel_vars]
+            
+            # Build the subset condition
+            # panelvals <- paste("'", panelvals, "'", sep = "") # Quote them, for later use in subset() with eval(parse())
+            # subset_condition = paste(paste(facetVars, "==", panelvals), collapse = " & ")
+            
+            # Subset the dataframe
+            # print(paste("-- Subsetting by facet condition:", subset_condition))
+            # d <- subset(d, eval(parse(text=subset_condition)))
+          } else {
+            print("-- Brush by facet (for filtering) mode OFF")
+          }
 
           # Brush
           brush <- isolate(input$scatterplot_brush)
@@ -734,6 +783,8 @@ shinyAppServer <-
                                 yvar = isolate(input$y),
                                 type = input$filter_type,
                                 stringsAsFactors = F)
+            
+            # Save polygon
             pgn <- brpts
 
             # Append the dataframe to the filters list
@@ -755,6 +806,10 @@ shinyAppServer <-
           } else {
             print("-- Not enough points for polygon filter.")
           }
+          
+          # Add facetvars
+          for(x in panel_vars) brpts[[facet_vars[[x]]]] <- panel_vals[[x]]
+          # write.csv(brpts, file = "/tmp/brpts.csv")
 
           if (nrow(pgnpts) < 3 & is.null(brush$xmin)) {
             print("Incomplete or missing selection, ignoring button press.")
