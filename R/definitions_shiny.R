@@ -356,6 +356,7 @@ apply_filters <- function(cdata,
 
 #' Apply shiny-filters to cdata, and return \code{magick} images of each one.
 #' 
+#' @param strips_or_squares Produce strips (TRUE) or square-ish tiles (FALSE). Passed to magickCell's return_single_imgs.
 #' @inheritParams apply_filters
 #' @inheritParams polyFilterApply
 #' @inheritParams magickCell
@@ -369,6 +370,7 @@ filter_group_pics <- function(cdata,
                               n.cells = 9,
                               unique_id_fields=c("ucid", "t.frame"),
                               truthMode = "all",
+                              strips_or_squares = T,
                               ...){
   # Create the PK's name
   cell_unique_id_field <- paste(unique_id_fields, collapse = "_")
@@ -418,11 +420,19 @@ filter_group_pics <- function(cdata,
   })
   
   # Get pictures
-  pics <- lapply(filters.data, magickCell, paths=paths, n.cells = n.cells, ...) %>% 
+  pics <- lapply(filters.data, magickCell, 
+                 paths=paths,
+                 n.cells = n.cells, 
+                 return_single_imgs = strips_or_squares, 
+                 ...) %>% 
+    # Append images, in case return_single_imgs=TRUE
     lapply(magick::image_append) %>% 
+    # Unlist the images
     magick::image_join() %>% 
+    # Add borders
     image_border_one() %>% 
-    magick::image_annotate(text = names(filters.data), gravity = "north")
+    # Add filter name to the image
+    magick::image_annotate(text = names(filters.data), gravity = "northwest")
   
   # Chin-pum!
   return(pics)

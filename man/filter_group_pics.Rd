@@ -2,7 +2,7 @@
 % Please edit documentation in R/definitions_shiny.R
 \name{filter_group_pics}
 \alias{filter_group_pics}
-\title{Apply shiny-filters to cdata, and return images of each one.}
+\title{Apply shiny-filters to cdata, and return \code{magick} images of each one.}
 \usage{
 filter_group_pics(
   cdata,
@@ -11,6 +11,7 @@ filter_group_pics(
   n.cells = 9,
   unique_id_fields = c("ucid", "t.frame"),
   truthMode = "all",
+  strips_or_squares = T,
   ...
 )
 }
@@ -26,6 +27,8 @@ filter_group_pics(
 \item{unique_id_fields}{Vector with the names of the columns which uniquely identify each observation (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).}
 
 \item{truthMode}{Priority for "Subtractive" and "Additive" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (Subtractive overcomes Additive) or "any" (Additive overcomes Subtractive).}
+
+\item{strips_or_squares}{Produce strips (TRUE) or square-ish tiles (FALSE). Passed to magickCell's return_single_imgs.}
 
 \item{...}{
   Arguments passed on to \code{\link[=magickCell]{magickCell}}
@@ -51,5 +54,5 @@ filter_group_pics(
   }}
 }
 \description{
-Apply shiny-filters to cdata, and return images of each one.
+Apply shiny-filters to cdata, and return \code{magick} images of each one.
 }
