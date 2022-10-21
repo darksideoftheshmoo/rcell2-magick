@@ -417,7 +417,7 @@ lapply(plots, function(plt){
 })
 ```
 
-### Annotate or tag cells: tagCell
+### Annotate cell phenotypes: tagCell
 
 This app will display the images of one time frame of a cell,
 and provides a menu to "annotate" relevant charachteristics 
