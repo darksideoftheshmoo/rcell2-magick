@@ -415,7 +415,7 @@ filter_group_pics <- function(cdata,
   # Re-set names
   names(filters.data) <- sapply(seq_along(filters), function(i){
     paste("filter", i,
-          paste(filters[[i]][1, c("xvar", "yvar")], collapse = "-"),
+          paste(filters[[i]][1, c("xvar", "yvar")], collapse = "_"),
           sep = "_")
   })
   

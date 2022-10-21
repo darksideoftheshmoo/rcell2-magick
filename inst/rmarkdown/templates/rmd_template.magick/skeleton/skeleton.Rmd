@@ -345,21 +345,49 @@ Filtering logic is documented in the function's help page: `?shinyCell`.
 > Note: oyu may want to test if Shiny works in your computer beforehand, using `shiny::runExample("01_hello")`.
 
 ```{r}
+# Run the app!
 result <- shinyCell(cdata, paths = images)
+```
 
+The final filter is added as a new `filter` column to cdata:
+
+```{r}
 # Devuelve cdata con una columna nueva "filter",
 # que dice cuales celulas pasaron el filtrado (TRUE) y cuales no (FALSE).
-result$cdata$filter
+table(result$cdata$filter)
+```
 
-# Lista de data.frames, con las coordenadas de cada region dibujada
-# sus variables, y el "tipo" de filtro que era.
-result$filters
+Filters are named dataframes, and define each region as the points of a polygon.
+They can be examined as follows:
+
+```{r}
+# List of dataframes with the coordinates of each drawn region,
+# the associated variable names, and the filter logic "type".
+names(result$filters)
+result$filters[[1]]
 ```
 
 The filters can be plotted using `plot_filters`:
 
 ```{r}
 plots <- plot_filters(result)
+```
+
+Yuo can examine images of cells in each filter group with `filter_group_pics`:
+
+```{r eval=F}
+# Choose a few filters at a time
+filter.subset <- result$filters[1:3]
+
+# Sample cells from each one
+pics <- filter_group_pics(cdata, images, filter.subset,
+                          # Only sample 9 cells:
+                          n.cells = 9)
+
+# Append images of each filter vertically
+pics %>% magick::image_append(stack = T) %>% 
+  # Include the output in an Rmarkdown chunk
+  magickForKnitr() %>% knitr::include_graphics()
 ```
 
 You can filter cdata by the `filter` column to remove the filtered cells:

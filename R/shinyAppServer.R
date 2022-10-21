@@ -851,9 +851,17 @@ shinyAppServer <-
         eventExpr = input[["quit"]],
         handlerExpr = {
           writeLines("\nQuit event fired!")
+          
+          # Re-set names
+          filters <- rv$filters
+          names(filters) <- sapply(seq_along(filters), function(i){
+            paste("filter", i,
+                  paste(filters[[i]][1, c("xvar", "yvar")], collapse = "_"),
+                  sep = "_")
+          })
 
           saved <- list(cdata = values$cdata,
-                        filters = rv$filters)
+                        filters = filters)
 
           # https://stackoverflow.com/questions/27365575/how-to-exit-a-shiny-app-and-return-a-value
           stopApp(saved)
