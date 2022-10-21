@@ -24,11 +24,11 @@ tagCell(
 )
 }
 \arguments{
-\item{cdata}{dataframe of "cell data".}
+\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
-\item{pdata}{dataframe "position data".}
+\item{pdata}{An optional "pdata" data.frame, with positions' metadata (NULL by default).}
 
-\item{paths}{dataframe of image paths.}
+\item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{cell_tags}{list of named vectors corresponding to tag groups and tags: list(named_item1 = c(option1, option2, ...), named_item2 ...).}
 

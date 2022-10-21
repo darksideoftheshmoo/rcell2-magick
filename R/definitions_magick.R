@@ -99,7 +99,7 @@ all.unique <- function(test_vector){
 #' cellMagick configured for prodicing a ucid's gif
 #' 
 #' @inheritParams magickCell
-#' @inheritDotParams  magickCell
+#' @inheritDotParams magickCell
 #' @param animation_delay Delay between animation frames in seconds.
 #' @param stack_channels_horizontally Time increases from left to right (TRUE) or from up to down (FALSE).
 #' @param channels Name of the CellID channel (BF, BF.out, RFP, etc.). "BF.out" by default.
@@ -569,11 +569,11 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
 #' $ is.out  <lgl> FALSE
 #' }
 #'
-#' @param cdata A Rcell data.frame (not the object).
-#' @param paths A paths dataframe with file path, t.frame, position and channel information of each picture.
+#' @param cdata A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
+#' @param paths A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
 #' @param max_composite_size Maximum size of the final composite image (this resize is applied last) in pixels. 1000 by default.
 #' @param cell_resize Resize string for the individual cell images (\code{NULL} translates to \code{boxSize}x\code{boxSize} by default).
-#' @param boxSize Size of the box containing the individual cell images. 50 by default.
+#' @param boxSize Lateral size of the square box extracted from the original images (in pixels). 50 px by default.
 #' @param n.cells Maximum number of cells to display (integer, set to \code{NULL} to display all cells in \code{cdata}).
 #' @param equalize_images Use magick's function to "equalize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).
 #' @param normalize_images Use magick's function to "normalize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).

@@ -4,7 +4,7 @@
 
 #' Find cell closest to hover point in shiny
 #' @param ui_input the "input" object from whiny server
-#' @param cdata the dataframe to filter
+#' @inheritParams magickCell
 #' @keywords internal
 hover_closest <- function(ui_input, cdata){
     d.closest <- sqrt(  
@@ -115,9 +115,9 @@ getPositions <- function(input, numPos){
 #' Adds a boolean "filter" column to the "cdata" dataframe, based on a polygon list (typically output by shinyCell).
 #' 
 #' @param polygon_df_list A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")
-#' @param cdata A "cdata" dataframe.
 #' @param truthMode Priority for "Subtractive" and "Additive" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (Subtractive overcomes Additive) or "any" (Additive overcomes Subtractive).
 #' @param cell_unique_id_field Name for the column holding the unique identifier (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).
+#' @inheritParams magickCell
 #' 
 #' @return a "saved_data" list object, where the cdata is appended a "filter" logical column.
 #' 
@@ -296,6 +296,148 @@ applyFilter <- function(cdataDF, filterDF, cell_unique_id_field = "ucid", truth_
     return(.cdataDF)
 }
 
+
+#' Apply shiny-filters to cdata
+#' 
+#' @param filters A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")
+#' @param unique_id_fields Vector with the names of the columns which uniquely identify each observation (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).
+#' @inheritParams polyFilterApply
+#' @inheritParams magickCell
+#' 
+#' @export
+#' 
+apply_filters <- function(cdata, 
+                          filters, 
+                          unique_id_fields=c("ucid", "t.frame"),
+                          truthMode = "all"){
+  # Create the PK's name
+  cell_unique_id_field <- paste(unique_id_fields, collapse = "_")
+  
+  # Check if names are in cdata
+  if(!all(unique_id_fields %in% names(cdata))) 
+    stop(paste0(
+      "\napply_filters: error, the following id_fields were not found in cdata: '",
+      paste(unique_id_fields[!unique_id_fields %in% names(cdata)], collapse = "', '"),
+      "'\n"
+    ))
+  
+  # Test if the ID column is already present
+  test <- cell_unique_id_field %in% cdata
+  if(test){
+    # Use it in that case
+    message(paste("\nThe", cell_unique_id_field, "already exists in cdata. Using it as a primary key."))
+  } else {
+    # Else create it from unique_id_fields
+    cdata[[cell_unique_id_field]] <- apply(cdata, 1, function(d) 
+      paste(d[unique_id_fields], collapse = "_")
+    )
+  }
+  
+  # Apply the filters
+  capture.output({
+    result <- polyFilterApply(polygon_df_list = filters, 
+                              cdata = cdata,
+                              truthMode = truthMode,
+                              cell_unique_id_field = cell_unique_id_field
+    )
+  })
+  
+  # Save the filtered cdata
+  result.cdata <- result$cdata[result$cdata$filter, ]
+  
+  # Remove the ID column if it was not present
+  if(!test) result.cdata[[cell_unique_id_field]] <- NULL
+  
+  # Chin-pum!
+  return(result.cdata)
+}
+
+
+
+#' Apply shiny-filters to cdata, and return \code{magick} images of each one.
+#' 
+#' @param strips_or_squares Produce strips (TRUE) or square-ish tiles (FALSE). Passed to magickCell's return_single_imgs.
+#' @inheritParams apply_filters
+#' @inheritParams polyFilterApply
+#' @inheritParams magickCell
+#' @inheritDotParams magickCell
+#' 
+#' @export
+#' 
+filter_group_pics <- function(cdata, 
+                              paths,
+                              filters, 
+                              n.cells = 9,
+                              unique_id_fields=c("ucid", "t.frame"),
+                              truthMode = "all",
+                              strips_or_squares = T,
+                              ...){
+  # Create the PK's name
+  cell_unique_id_field <- paste(unique_id_fields, collapse = "_")
+  
+  # Check if names are in cdata
+  if(!all(unique_id_fields %in% names(cdata))) 
+    stop(paste0(
+      "\napply_filters: error, the following id_fields were not found in cdata: '",
+      paste(unique_id_fields[!unique_id_fields %in% names(cdata)], collapse = "', '"),
+      "'\n"
+    ))
+  
+  # Test if the ID column is already present
+  test <- cell_unique_id_field %in% cdata
+  if(test){
+    # Use it in that case
+    message(paste("\nThe", cell_unique_id_field, "already exists in cdata. Using it as a primary key."))
+  } else {
+    # Else create it from unique_id_fields
+    cdata[[cell_unique_id_field]] <- apply(cdata, 1, function(d) 
+      paste(d[unique_id_fields], collapse = "_")
+    )
+  }
+  
+  # Get the points filtered (removed) by each filter
+  filters.data <- lapply(seq_along(filters), function(i){
+    # Apply the filters
+    capture.output({
+      result <- polyFilterApply(polygon_df_list = filters[i], 
+                                cdata = cdata,
+                                truthMode = truthMode,
+                                cell_unique_id_field = cell_unique_id_field
+      )
+    })
+    
+    # Save the filtered cdata
+    result.cdata <- result$cdata[!result$cdata$filter, ]  # note the "!"
+    
+    # Return the data
+    return(result.cdata)
+  })
+  # Re-set names
+  names(filters.data) <- sapply(seq_along(filters), function(i){
+    paste("filter", i,
+          paste(filters[[i]][1, c("xvar", "yvar")], collapse = "_"),
+          sep = "_")
+  })
+  
+  # Get pictures
+  pics <- lapply(filters.data, magickCell, 
+                 paths=paths,
+                 n.cells = n.cells, 
+                 return_single_imgs = strips_or_squares, 
+                 ...) %>% 
+    # Append images, in case return_single_imgs=TRUE
+    lapply(magick::image_append) %>% 
+    # Unlist the images
+    magick::image_join() %>% 
+    # Add borders
+    image_border_one() %>% 
+    # Add filter name to the image
+    magick::image_annotate(text = names(filters.data), gravity = "northwest")
+  
+  # Chin-pum!
+  return(pics)
+}
+
 #' Plot shinyCell polygon filters
 #' 
 #' Useful to check out what areas the filters are covering.
@@ -458,7 +600,7 @@ plot_bound_filters <- function(bound_filters){
 
 #' Armar data.frame para plots tipo HEXBIN con facets
 #'
-#' @param cdata A data.frame (tipically rcell's \code{cdata}).
+#' @inheritParams magickCell
 #' @param facetVars Charachter vector with the names of grouping variables (tipically in rcell's \code{pdata})
 #' @param varx Name of the x-axis variable.
 #' @param vary Name of the y-axis variable.

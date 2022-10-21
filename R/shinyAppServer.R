@@ -56,6 +56,17 @@ shinyAppServer <-
       saved <- list()
       print("Initialization done!")
     }
+    
+    # Handy functions ####
+    make_filter_polygon_df <- function(x, y, xvar, yvar, type){
+      brpts <- data.frame(x = x,
+                          y = y,
+                          xvar = xvar,
+                          yvar = yvar,
+                          type = type,
+                          stringsAsFactors = F)
+      return(brpts)
+    }
 
     ### FILTER TAB OBSERVER ###
     {
@@ -350,10 +361,23 @@ shinyAppServer <-
                   } else print("-- brush change by null (not updating)")  # Si el nuevo brush está vacío, no hacer nada.
 
                 } else print("-- no brush net change (not updating)")  # Si el nuevo brush es igual al anterior, no hacer nada.
-
+                
+                # Brush contents:
+                # 
+                # print("-- brush:")
+                # print(input$scatterplot_brush)
+                # print("--")
+                #                 
+                # print("-- brush panelvar1:")
+                # print(input$scatterplot_brush$panelvar1)
+                # print("--")
+                # 
+                # print("-- brush mapping:")
+                # print(input$scatterplot_brush$mapping$panelvar1)
+                # print("--")
+                
                 # Others
                 # n <- nrow(values$cdata) # ??? lo comenté porque ni idea que hacia
-
               })
 
 
@@ -679,25 +703,27 @@ shinyAppServer <-
           
           # Load all polygons
           pgnpts <- isolate(rv$pgnpts)  # will fire on click, isolation is prudent
-
+          
+          # Make df with the new polygon point
+          new_pgnpts <- make_filter_polygon_df(x = isolate(input$vertex1$x),
+                                               y = isolate(input$vertex1$y),
+                                               xvar = isolate(input$x),
+                                               yvar = isolate(input$y),
+                                               # Filter type will be overwritten when the add filter button is pressed
+                                               type = input$filter_type,
+                                               stringsAsFactors = F)
+          
           # Add a new row with the new point
           if(nrow(pgnpts) == 0){
-            pgnpts <- data.frame(x = isolate(input$vertex1$x),
-                                 y = isolate(input$vertex1$y),
-                                 xvar = isolate(input$x),
-                                 yvar = isolate(input$y),
-                                 stringsAsFactors = F)
+            # Either create the dataframe
+            pgnpts <- new_pgnpts
           } else {
-            pgnpts <- bind_rows(pgnpts,
-                                data.frame(x = isolate(input$vertex1$x),
-                                           y = isolate(input$vertex1$y),
-                                           xvar = isolate(input$x),
-                                           yvar = isolate(input$y),
-                                           stringsAsFactors = F))
+            # Or bind the new point to the others
+            pgnpts <- bind_rows(pgnpts, new_pgnpts)
           }
-
+          
+          # Update the reactive object
           rv$pgnpts <- pgnpts
-
 
         }, label = "Click observer 1")
 
@@ -722,18 +748,55 @@ shinyAppServer <-
 
           # Density 1D should be treated differently
           plot.type <- isolate(input$ptype)
+          
+          # Get facet ingo
+          panel_vars <- list()
+          # Si hay algo escrito en el facet formula field, filtrar el dataframe para mostrar solo las imagenes del facet seleccionado.
+          if(input$facet != "" && input$facet_brush){
+          # if(F){
+            print("-- Brush by facet (for filtering) mode ON")
+            
+            # Cada "eje" del facet tiene los posibles valores de una variable de pdata.
+            
+            # Primero conseguir las variables en la fórmula (debería estar primera la variable en el "eje y del facet")
+            facetVars <- all.vars(eval(parse(text=input$facet)))
+            facetVars <- facetVars[facetVars != "."]  # Sacar el puntito de las variables
+            facetVars <- rev(facetVars)  # Dar vuelta, porque necesito primero los X y después los Y.
+            
+            # Conseguir los valores de las variables del facet usando información del brush.
+            brush_names <- names(input$scatterplot_brush)       # Get names of stuff in the brush
+            panel_vars_index <- grep("panelvar", brush_names)   # Get indexes of the panelvars (facets)
+            panel_vars <- brush_names[panel_vars_index]         # Get the panelvars (panelvar1, panelvar2, etc.)
+            
+            # The good stuff:
+            # Get the names of the faceting variables (pos, treatment, t.frame, etc.)
+            facet_vars <- input$scatterplot_brush$mapping[panel_vars]
+            # Get the values of the faceting variables (0, "control", 12, etc.)
+            panel_vals <- input$scatterplot_brush[panel_vars]
+            
+            # Build the subset condition
+            # panelvals <- paste("'", panelvals, "'", sep = "") # Quote them, for later use in subset() with eval(parse())
+            # subset_condition = paste(paste(facetVars, "==", panelvals), collapse = " & ")
+            
+            # Subset the dataframe
+            # print(paste("-- Subsetting by facet condition:", subset_condition))
+            # d <- subset(d, eval(parse(text=subset_condition)))
+          } else {
+            print("-- Brush by facet (for filtering) mode OFF")
+          }
 
-          # Brush
+          # Add polygon from Brush
           brush <- isolate(input$scatterplot_brush)
           if(!is.null(brush$xmin)){
             print("-- Brush mode ON")
             brpts <- square(brush$xmin, brush$ymin, brush$xmax, brush$ymax)
-            brpts <- data.frame(x = brpts$x,
-                                y = brpts$y,
-                                xvar = isolate(input$x),
-                                yvar = isolate(input$y),
-                                type = input$filter_type,
-                                stringsAsFactors = F)
+            brpts <- make_filter_polygon_df(x = brpts$x,
+                                            y = brpts$y,
+                                            xvar = isolate(input$x),
+                                            yvar = isolate(input$y),
+                                            type = input$filter_type)
+            
+            # Save polygon
             pgn <- brpts
 
             # Append the dataframe to the filters list
@@ -743,19 +806,26 @@ shinyAppServer <-
             print("-- Brush empty, no filter created from brush.")
           }
 
-          # Polygon
+          # Add filter from Polygon
           pgnpts <- rv$pgnpts
           if(nrow(pgnpts) >= 3){
             print("-- Polygon mode ON")
-            pgn <- cbind(pgnpts, data.frame(type = input$filter_type, stringsAsFactors = F))
+            
+            # Update type to current value of the option
+            pgnpts$type <- input$filter_type
+            
+            # Save polygon
+            pgn <- pgnpts
 
             # Append the dataframe to the filters list
             filter_length <- length(rv$filters) + 1
             rv$filters[[filter_length]] <- pgn  # This will fire FILTER TAB EVENTS OBSERVER
+            
           } else {
             print("-- Not enough points for polygon filter.")
           }
-
+          
+          # Final check, and update checkbox.
           if (nrow(pgnpts) < 3 & is.null(brush$xmin)) {
             print("Incomplete or missing selection, ignoring button press.")
           } else {
@@ -781,9 +851,17 @@ shinyAppServer <-
         eventExpr = input[["quit"]],
         handlerExpr = {
           writeLines("\nQuit event fired!")
+          
+          # Re-set names
+          filters <- rv$filters
+          names(filters) <- sapply(seq_along(filters), function(i){
+            paste("filter", i,
+                  paste(filters[[i]][1, c("xvar", "yvar")], collapse = "_"),
+                  sep = "_")
+          })
 
           saved <- list(cdata = values$cdata,
-                        filters = rv$filters)
+                        filters = filters)
 
           # https://stackoverflow.com/questions/27365575/how-to-exit-a-shiny-app-and-return-a-value
           stopApp(saved)

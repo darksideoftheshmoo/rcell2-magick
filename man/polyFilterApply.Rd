@@ -14,7 +14,7 @@ polyFilterApply(
 \arguments{
 \item{polygon_df_list}{A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")}
 
-\item{cdata}{A "cdata" dataframe.}
+\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
 \item{truthMode}{Priority for "Subtractive" and "Additive" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (Subtractive overcomes Additive) or "any" (Additive overcomes Subtractive).}
 

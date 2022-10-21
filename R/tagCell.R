@@ -9,9 +9,8 @@
 
 #' Filtrar cdata usando gráficos y dibujando regiones
 #'
-#' @param cdata dataframe of "cell data".
-#' @param pdata dataframe "position data".
-#' @param paths dataframe of image paths.
+#' @inheritParams magickCell
+#' @inheritParams shinyCell
 #' @param cell_tags list of named vectors corresponding to tag groups and tags: list(named_item1 = c(option1, option2, ...), named_item2 ...).
 #' @param randomize_ucids Randomize ucid order.
 #' @param tag_box_size Size in pixels of the square crop of the image, around the center of the cell. A larger value is useful for larger or mode lengated cells.
