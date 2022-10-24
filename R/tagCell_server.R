@@ -489,7 +489,7 @@ tagCellServer <- function(input, output, session) {
       
       table_output <- separate(table_output, ucid_t.frame, c("ucid", "t.frame"), convert = T) %>% 
         mutate(ucid = as.integer(ucid), t.frame = as.integer(t.frame)) %>% 
-        right_join(viewed_ucids)
+        right_join(viewed_ucids, by = "ucid")
       
     } else {
       table_output <- viewed_ucids
@@ -537,7 +537,7 @@ tagCellServer <- function(input, output, session) {
         
         table_output <- separate(table_output, ucid_t.frame, c("ucid", "t.frame"), convert = T) %>% 
           mutate(ucid = as.integer(ucid), t.frame = as.integer(t.frame)) %>% 
-          right_join(viewed_ucids)
+          right_join(viewed_ucids, by = "ucid")
         
       } else {
         table_output <- viewed_ucids
@@ -583,7 +583,7 @@ tagCellServer <- function(input, output, session) {
       if(nrow(table_output) > 0){
         table_output <- separate(table_output, ucid_t.frame, c("ucid", "t.frame")) %>% 
           mutate(ucid = as.integer(ucid), t.frame = as.integer(t.frame)) %>% 
-          right_join(viewed_ucids)
+          right_join(viewed_ucids, by = "ucid")
         
         showNotification(paste("-- Saving progress to file:", tmp_output_file), duration = 4, type = "message")
         

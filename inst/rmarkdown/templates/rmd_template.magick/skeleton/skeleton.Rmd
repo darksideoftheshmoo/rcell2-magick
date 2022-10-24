@@ -164,8 +164,7 @@ an interface to the _ImageMagick_ library.
 
 You must install ImageMagick in your system using your package-manager, 
 or by following instructions available here:
-
-* https://imagemagick.org/script/download.php
+https://imagemagick.org/script/download.php
 
 ### Simple usage examples
 
@@ -249,7 +248,7 @@ cdata %>% arrange(ucid, t.frame) %>% group_by(ucid) %>% filter(n() == 2) %>%
             # Normalize the first channel
             normalize_images = c(T,F)
             ) %>%
-  # Inlcude image in the notebook
+  # Include image in the notebook
   magickForKnitr() %>% knitr::include_graphics()
 ```
 
