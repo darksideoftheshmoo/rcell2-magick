@@ -49,80 +49,81 @@ library(magick)
 
 ## Friendly reminders
 
-**READ THE README**.md at rcell2's GitHub repo.
+- **Read the help page** of functions before using them. Open help pages with R's `?` (e.g. `?arguments`).
+- **Read the README**.md at rcell2's [GitHub repo](https://github.com/darksideoftheshmoo/rcell2/).
 
 ## Prepare data
 
-The example requires microscopy images to work.
+The examples here require microscopy images, already processed by Cell-ID,
+Which are available in the `rcell2.examples` package.
 
-Set the location of your image set (if you have one already):
+### Image directory
+
+First point R to the folder containing the images.
+
+If you already have an appropriate dataset, specify the path to the images like this:
 
 ```{r}
+# Location of your image set
 data.dir <- "/path/to/your/data"
 ```
 
-Otherwise, until you get you own, you may get sample images from the `rcell2.examples` package.
+Otherwise, install and use the "examples" package:
 
-Install directly from GitHub using the `remotes` package:
-
-```{r}
-if(!require(remotes)){
+```{r eval=F}
+if(!requireNamespace("remotes")){
   # Install the "remotes" package if not found:
   install.packages("remotes")
 }
 
-if(!require(rcell2.examples)){
+if(!requireNamespace("rcell2.examples")){
   # Install the "rcell2.examples" package if not found:
   remotes::install_github("darksideoftheshmoo/rcell2.examples")
 }
 
-# Or use the example images
-data.dir <- system.file("extdata/sample_datasets/sample_time_series/",
-                        package = "rcell2.examples")
+# List available datasets:
+dir(system.file("extdata/sample_datasets/", package = "rcell2.examples"))
 ```
 
-List files, just to check:
+And get the path to the chosen example dataset, then use `dir` to check if the files are there:
 
 ```{r}
+# Example: Choose one set of example images:
+data.dir <- system.file("extdata/sample_datasets/sample_time_series/",
+                        package = "rcell2.examples")
+
+# List image files in the set:
 dir(data.dir)
 ```
 
 ### Run Cell-ID
 
-This is optional if you have already run Cell-ID, 
-either by using the `rcell2.cellid` package, or 
-the other methods (command-line, V-CellID, etc.).
+If using the example images, this step should be skipped. They have already been
+processed by Cell-ID, to simplify this walkthrough.
 
-Generate arguments:
+A full description of the segmentation procedure foryour own images is available
+in the notebook template of the `rcell2.cellid` package.
 
-```{r eval=F}
-cellid.args <- 
-  rcell2.cellid::arguments(
-    path = data.dir, 
-    file.pattern = "^(BF|[A-Z]FP)_Position(\\d+)_time(\\d+).tif$", 
-    file.pattern.groups.order = c("ch", "pos", "t.frame")
-  )
-```
-
-Run Cell-ID:
+Execute the following to install the package and open the template:
 
 ```{r eval=F}
-cellid.log <- rcell2.cellid::cell2(arguments = cellid.args)
+if(!requireNamespace("rcell2.cellid")) remotes::install_github("darksideoftheshmoo/rcell2-cellid")
+rcell2.cellid::get_workflow_template_cellid()
 ```
 
 ### Load Cell-ID output
 
-You need only to point `rcell2.cellid::cell.load.alt` or `rcell2::load_cell_data`
-to the directory where images and the Cell-ID output are located.
+This section requires either the `rcell2` or the `rcell2.cellid` package.
+
+You need only to point `load_cell_data` or `cell.load.alt` to the directory
+where images and the Cell-ID output are located.
+
+The following example loads the example dataset of the previous section.
 
 ```{r}
-# Load "cell data" with cell.load.alt, instead of using load_cell_data.
-# The default integer ucids make nicer names later on.
+# Load Cell-ID's output
 # cell_data <- rcell2::load_cell_data(data.dir)
 cell_data <- rcell2.cellid::cell.load.alt(data.dir)
-
-# Optionally: Use this dataset for testing
-# cell_data <- readRDS("data/image_samples/cell_data.RDS")
 
 # Get the table with single-cell measurements
 cdata <- cell_data$data
@@ -131,18 +132,32 @@ cdata <- cell_data$data
 images <- cell_data$images
 ```
 
-> The "c" in "cdata" stands for _cell_ data.
+A full description of this procedure is available in the notebook template 
+of the `rcell2` package.
 
-### Load metadata
+Execute the following to install the package and open the template:
 
-> This step is optional, but also part of our usual workflow. The `pdata` CSV file
-> holds information about how the cells of each image were prepared and treated.
+```{r eval=F}
+if(!requireNamespace("rcell2.cellid")) remotes::install_github("darksideoftheshmoo/rcell2-cellid")
+rcell2.cellid::get_workflow_template_cellid()
+```
+
+> Note: the "c" in "cdata" stands for _cell_ data.
+
+### Load position metadata
+
+This step is optional, but also part of our usual workflow.
+
+The `pdata` CSV file holds information about how the cells
+of each position (and time) were prepared and treated.
 
 Get the path to the file:
 
 ```{r}
 # pdata_path <- "path/to/your/pdata.csv"
 pdata_path <- dir(data.dir, "pdata.csv", full.names = T)  # Sample pdata
+
+pdata_path
 ```
 
 Load "pdata":
@@ -151,9 +166,20 @@ Load "pdata":
 # It is a "metadata" dataframe we usually join to cdata by "position" and/or "t.frame",
 # which contains other experimental variables: simuli concentrations, notes, etc.
 pdata <- readr::read_csv(pdata_path)
+
+pdata
 ```
 
-> The "p" in "pdata" stands for microscope _position_ data.
+> Note: the "p" in "pdata" stands for microscope _position_ data.
+
+This table is usually joined to cdata by position (and time frame if available).
+
+> Warning: `load_cell_data` does the following automatically if a pdata.csv file is found next to the images.
+> If it were the case, you shouldn't run the join again.
+
+```{r eval=F}
+cdata <- left_join(cdata, pdata)
+```
 
 ## Magick
 
@@ -177,11 +203,11 @@ pics
 ```
 
 Note: by default RStudio will display magick images in the viewer pane.
-Use `magickForKnitr` and `knitr::include_graphics` to preview the images
-in this Rmd notebook:
+Use `magickForKnitr` (which wraps `knitr::include_graphics`) to preview the 
+images in an Rmd notebook chunk:
 
 ```{r}
-pics %>% magickForKnitr() %>% knitr::include_graphics()
+pics %>% magickForKnitr()
 ```
 
 <!-- See: -->
@@ -193,8 +219,11 @@ Other simple `magick` examples:
 
 ```{r}
 # Return single images (as magick image vector):
-magickCell(cdata, images, 
+pics <- magickCell(cdata, images, 
            return_single_imgs = T)
+
+pics %>% 
+  magickForKnitr(format = "gif")
 ```
 
 
@@ -207,10 +236,13 @@ image_customize <- function(i){
 
 
 ```{r}
-magickCell(cdata, images, 
-           customize_images = T,
-           image_customize = image_customize
-           )
+pics <- 
+  magickCell(cdata, images, 
+             customize_images = T,
+             image_customize = image_customize
+             )
+
+pics %>% magickForKnitr()
 ```
 
 
@@ -222,11 +254,14 @@ images$channel %>% unique()
 
 ```{r}
 # Load two image channels, but customize them differently:
-magickCell(cdata, images, ch = c("BF.out", "yfp"),
-           normalize_images = c(F, T),
-           customize_images = c(T, F),
-           image_customize = image_customize
-)
+pics <- 
+  magickCell(cdata, images, ch = c("BF.out", "yfp"),
+             normalize_images = c(F, T),
+             customize_images = c(T, F),
+             image_customize = image_customize
+  )
+
+pics %>% magickForKnitr()
 ```
 
 ### Advanced functions
@@ -239,7 +274,9 @@ in order to produce strips for a single cell in time.
 The strips are sorted by "t.frame" by default, but it can be overriden. 
 
 ```{r}
-cdata %>% arrange(ucid, t.frame) %>% group_by(ucid) %>% filter(n() == 2) %>% 
+sample.ucid <- cdata$ucid %>% sample(1)
+
+cdata %>% arrange(ucid, t.frame) %>% filter(ucid==sample.ucid) %>%
   cellStrip(images, 
             # Don't sort by time first
             time_colum = NULL,
@@ -249,7 +286,7 @@ cdata %>% arrange(ucid, t.frame) %>% group_by(ucid) %>% filter(n() == 2) %>%
             normalize_images = c(T,F)
             ) %>%
   # Include image in the notebook
-  magickForKnitr() %>% knitr::include_graphics()
+  magickForKnitr()
 ```
 
 Multiple strips (one per ucid):
@@ -266,7 +303,7 @@ pics <- cellStrips(cdata, images, n_ucids = 10,
 # Choose one
 pics[[1]] %>% 
   # Display it inline in a Rmd notebook
-  magickForKnitr() %>% knitr::include_graphics()
+  magickForKnitr()
 ```
 
 Tiles:
@@ -279,7 +316,7 @@ magickCell(cdata, images,
   # Then build a "tile"
   square_tile(nCol = 9) %>%
   # Display it inline in a Rmd notebook
-  magickForKnitr() %>% knitr::include_graphics()
+  magickForKnitr()
 ```
 
 Make a nice 2D plot, showing random cells on each bin of the variable pair:
@@ -291,8 +328,7 @@ pics <-
              for_plotting = F)
 
 pics %>%
-  # Display it inline in a Rmd notebook
-  magickForKnitr() %>% knitr::include_graphics()
+  magickForKnitr()
 ```
 
 Make a 2D plot, binned by selected variables, displaying a sample cell in each 2D bin:
@@ -316,8 +352,7 @@ pic <- magickCell(cdata, images,
                   n.cells = 1)
 
 image_border_one(pic) %>%
-  # Display it inline in a Rmd notebook
-  magickForKnitr() %>% knitr::include_graphics()
+  magickForKnitr()
 ```
 
 > Useful to add titles!
@@ -376,7 +411,7 @@ Yuo can examine images of cells in each filter group with `filter_group_pics`:
 
 ```{r eval=F}
 # Choose a few filters at a time
-filter.subset <- result$filters[1:3]
+filter.subset <- result$filters[1]  # Only the first one in this case
 
 # Sample cells from each one
 pics <- filter_group_pics(cdata, images, filter.subset,
@@ -386,7 +421,7 @@ pics <- filter_group_pics(cdata, images, filter.subset,
 # Append images of each filter vertically
 pics %>% magick::image_append(stack = T) %>% 
   # Include the output in an Rmarkdown chunk
-  magickForKnitr() %>% knitr::include_graphics()
+  magickForKnitr()
 ```
 
 You can filter cdata by the `filter` column to remove the filtered cells:
@@ -456,7 +491,8 @@ Frist generate a plot:
 
 ```{r}
 plt <- ggplot(cdata) + 
-  geom_point(aes(xpos, ypos))
+  geom_point(aes(xpos, ypos)) + 
+  coord_equal()
 
 plt
 ```
@@ -466,10 +502,14 @@ And then pass the plot to `plotApp`:
 ```{r}
 selected.cdata <- plotApp(plt)
 
-selected.cdata
+# Re-plot, overwriting original data in the plot.
+plt %+% selected.cdata + 
+  # Use the same axis limits.
+  xlim(min(cdata$xpos), max(cdata$xpos)) +
+  ylim(min(cdata$ypos), max(cdata$ypos))  
 ```
 
-> A much simpler version of `shinyCell`.
+> A much simpler version of `shinyCell`, in a way.
 
 ## Extra
 
