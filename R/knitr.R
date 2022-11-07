@@ -6,7 +6,7 @@
 #' @param .resize a cellMagick image resize string as "200x200" (default NULL, for no resizing).
 #' @param .path Directory where the output should be saved.
 #' @param .file Full path to the file name where the image will be saved. Overrides all other file name parameters.
-# @param .include Set to true to use knitr::include_graphics directly.
+#' @param .include Set to true to use knitr::include_graphics directly.
 #' @param .print Print the image path.
 #' @inheritParams magick::image_write
 #' @inheritDotParams magick::image_write
@@ -20,7 +20,8 @@ magickForKnitr <- function(imgs,
                            .resize = NULL, 
                            .path = tempdir(),
                            .file = NULL,
-                           .print=F,
+                           .include = TRUE,
+                           .print=FALSE,
                            ...){
   
   dir.create(.path, recursive = T, showWarnings = F)
@@ -37,14 +38,15 @@ magickForKnitr <- function(imgs,
     {if(is.null(.resize)) . else magick::image_resize(., .resize)} %>% 
     magick::image_write(path = temp, format = format, ...)
   
-  if(.print) print(temp)
+  if(.print) cat(temp)
   
   
-  # if(.include){
-  #   include.env <- new.env()
-  #   include.env$temp <- temp
-  #   eval(expr=parse(text="knitr::include_graphics(temp)"), envir = list(parent.env(env = environment()), include.env))
-  # }
+  if(.include){
+    if(isTRUE(requireNamespace("knitr", quietly = T)))
+      print(knitr::include_graphics(temp))
+    else
+      warning("\nmagickForKnitr: include requested but knitr is not installed.")
+  }
   
-  return(temp)
+  return(invisible(temp))
 }

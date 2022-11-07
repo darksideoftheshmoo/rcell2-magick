@@ -94,10 +94,24 @@ tagCell <- function(cdata,
                     verbose=0
                     ){
   
-  # To-do
-  # Invalid input$facet generates warnings and errors, this should be handled. Also, only "~", "." and "+" are handled in forumlas.
-  # Implement more-than-2 variable faceting. The third and ith faceting variables of the brush are stored in "panelvar3" and so on (?)
-  # Integrate polygon filter functionality, currently the drawn polygons do nothing (except show up).
+  # Check tags.df  
+  if(!is.null(tags.df)){
+    if(!all(names(cell_tags) %in% names(tags.df))){
+      # Get missing columns
+      tags_df_missing_cols <- setdiff(names(cell_tags),
+                                      names(tags.df))
+      
+      # Warn
+      warning(paste0(
+        "tagCell: some names in the 'cell_tags' were missing from the provided 'tags.df', adding NA columns for names: '",
+        paste(tags_df_missing_cols, collapse = "', '"),
+        "'."
+      ))
+      
+      # Fill them with NAs
+      tags.df[, tags_df_missing_cols] <- NA
+    }
+  }
   
   # Hotkeys (for the keys package)
   hotkeys <- c(
@@ -155,11 +169,27 @@ tagCell <- function(cdata,
   environment(tagCellUi) <- environment()
   
   #### RUN APP ####
-  saved <- shiny::runApp(list(ui = tagCellUi(), server = tagCellServer))
+  tags.df <- shiny::runApp(list(ui = tagCellUi(), server = tagCellServer))
+  
+  # Check tags.df (again)
+  if(!all(names(cell_tags) %in% names(tags.df))){
+    # Get missing columns
+    tags_df_missing_cols <- setdiff(names(cell_tags),
+                                    names(tags.df))
+    
+    # Warn
+    message(paste0(
+      "tagCell: some names in the 'cell_tags' were not used, adding NA columns to 'tags.df' for names: '",
+      paste(tags_df_missing_cols, collapse = "', '"),
+      "'."
+    ))
+    
+    # Fill them with NAs
+    tags.df[, tags_df_missing_cols] <- NA
+  }
   
   #### RETURN RESULT ####
-  # Devolver una lista con los objetos cdata cfilter y los stringFilters
-  return(saved)
+  return(tags.df)
 }
             
 #' Pivot cell tags to a cdata-joinable dataframe, with one hot encoding

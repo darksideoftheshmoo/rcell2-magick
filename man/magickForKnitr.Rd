@@ -11,7 +11,8 @@ magickForKnitr(
   .resize = NULL,
   .path = tempdir(),
   .file = NULL,
-  .print = F,
+  .include = TRUE,
+  .print = FALSE,
   ...
 )
 }
@@ -27,6 +28,8 @@ magickForKnitr(
 \item{.path}{Directory where the output should be saved.}
 
 \item{.file}{Full path to the file name where the image will be saved. Overrides all other file name parameters.}
+
+\item{.include}{Set to true to use knitr::include_graphics directly.}
 
 \item{.print}{Print the image path.}
 
