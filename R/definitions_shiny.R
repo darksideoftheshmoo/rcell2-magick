@@ -59,7 +59,7 @@ square <- function(x1, y1, x2, y2){
 #' 
 #' @param df The data.frame to check.
 #' @param print.which Print which columns have bad values to the console.
-#' @return Logical value: TRUE (chekc passed) or FALSE (check failed; nasty values found).
+#' @return Logical value: FALSE (check passed) or TRUE (check failed; nasty values found).
 #' @keywords internal
 has.na_nan_inf <- function (df, print.which = F) {
   r <- lapply(df, function(x) is.nan(x) | is.infinite(x) | 

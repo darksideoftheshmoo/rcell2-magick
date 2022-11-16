@@ -96,9 +96,9 @@ shinyCell <- function(cdata,
                       ...){
   
   if(!skip_input_check){
-    if(has.na_nan_inf(cdata)) stop("Error: your 'cdata' dataframe has NaN, NA and/or Inf values. Try using 'rcell2:::has.na_nan_inf() to find problematic columns.'")
-    if(has.na_nan_inf(pdata)) stop("Error: your 'pdata' dataframe has NaN, NA and/or Inf values. Try using 'rcell2:::has.na_nan_inf() to find problematic columns.'")
-    if(has.na_nan_inf(paths)) stop("Error: your 'paths' dataframe has NaN, NA and/or Inf values. Try using 'rcell2:::has.na_nan_inf() to find problematic columns.'")
+    if(has.na_nan_inf(cdata)) stop("Error: your 'cdata' dataframe has NaN, NA and/or Inf values. Try using 'rcell2.magick:::has.na_nan_inf() to find problematic columns.'")
+    if(has.na_nan_inf(pdata)) stop("Error: your 'pdata' dataframe has NaN, NA and/or Inf values. Try using 'rcell2.magick:::has.na_nan_inf() to find problematic columns.'")
+    if(has.na_nan_inf(paths)) stop("Error: your 'paths' dataframe has NaN, NA and/or Inf values. Try using 'rcell2.magick:::has.na_nan_inf() to find problematic columns.'")
   }
   
   if(is.null(pdata)) pdata <- data.frame(pos = safe_select(cdata, "pos"))

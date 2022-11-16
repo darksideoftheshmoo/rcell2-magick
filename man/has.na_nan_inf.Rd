@@ -12,7 +12,7 @@ has.na_nan_inf(df, print.which = F)
 \item{print.which}{Print which columns have bad values to the console.}
 }
 \value{
-Logical value: TRUE (chekc passed) or FALSE (check failed; nasty values found).
+Logical value: FALSE (check passed) or TRUE (check failed; nasty values found).
 }
 \description{
 Check dataframes for NA, NaN or Inf values.
