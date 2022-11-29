@@ -114,8 +114,8 @@ getPositions <- function(input, numPos){
 #' 
 #' Adds a boolean "filter" column to the "cdata" dataframe, based on a polygon list (typically output by shinyCell).
 #' 
-#' @param polygon_df_list A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")
-#' @param truthMode Priority for "Subtractive" and "Additive" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (Subtractive overcomes Additive) or "any" (Additive overcomes Subtractive).
+#' @param polygon_df_list A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Exclude" or "Include")
+#' @param truthMode Priority for "Exclude" and "Include" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (exclusion overcomes inclusion) or "any" (inclusion overcomes exclusion).
 #' @param cell_unique_id_field Name for the column holding the unique identifier (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).
 #' @inheritParams magickCell
 #' 
@@ -162,9 +162,13 @@ polyFilterApply <- function(polygon_df_list,
 #' Build filterDF from polygonDF and cdataDF
 #' 
 #' @param cdataDF A "cdata" dataframe.
+#' @param inclusive_logic_name Logic name for the "inclusive" group of filters, selecting their union / inclusive or. 
+#' @param exclusive_logic_name Logic name for the "exclusive" group of filters, selecting the complement of their union. 
 #' 
 #' @keywords internal
-polyFilterCell <- function(cdataDF, filterDF, polygonDF, polygonName = 1){
+polyFilterCell <- function(cdataDF, filterDF, polygonDF, polygonName = 1, 
+                           inclusive_logic_name = "Include",
+                           exclusive_logic_name = "Exclude"){
     print(paste("F4: polygon name:", polygonName))
     # polygonDF is NULL
 
@@ -173,12 +177,12 @@ polyFilterCell <- function(cdataDF, filterDF, polygonDF, polygonName = 1){
 
     pips <- pip(points = cdataDF[,c(xvar, yvar)], pgn = polygonDF)
 
-    type <- polygonDF[1, "type"]  # Poolygon filter type, as chosen at the shiny app
+    type <- polygonDF[1, "type"]  # Polygon filter type, as chosen at the shiny app
 
-    if(type == "Additive") {
+    if(type == inclusive_logic_name) {
         filterDF[, paste0(polygonName, "_", type)] <-  as.logical(pips)
 
-    } else if(type == "Subtractive") {
+    } else if(type == exclusive_logic_name) {
         filterDF[, paste0(polygonName, "_", type)] <- !as.logical(pips)
 
     } else {
@@ -217,7 +221,9 @@ pip <- function(points, pgn, points_x_column = 1, points_y_column = 2, pgn_x_col
 #' as it produces appropriate inputs.
 #' 
 #' @param filterDF The "cfilter" dataframe, as built by \code{\link{polyFilterApply}} by iteratively calling \code{\link{polyFilterCell}}.
-#' @param mode Must be either "all" ("Subtractive" overrides "Additive") or "any" ("Additive" overrides "Subtractive").
+#' @param mode Filter logic priority. Must be either "all" (exclusion overrides inclusion) or "any" (inclusion overrides exclusion).
+#' @param inclusive_logic_name Logic name for the "inclusive" group of filters, selecting their union / inclusive or. 
+#' @param exclusive_logic_name Logic name for the "exclusive" group of filters, selecting the complement of their union. 
 #' @param truth_column Name of the column with the boolean filter.
 #' 
 #' @keywords internal
@@ -225,7 +231,9 @@ pip <- function(points, pgn, points_x_column = 1, points_y_column = 2, pgn_x_col
 calculateTruth <- function(filterDF, 
                            cell_unique_id_field = "ucid", 
                            truth_column = "filter",
-                           mode = "all"){
+                           mode = "all",
+                           inclusive_logic_name = "Include",
+                           exclusive_logic_name = "Exclude"){
     print("F6.1: calculateTruth")
     # browser()
     # Descartar columnas que no me interesan para calcular la verdad
@@ -234,7 +242,7 @@ calculateTruth <- function(filterDF,
 
     # Find filter types from the filterDF column names; names come from polyFilterCell()
     types <- sub(".*_(.*)", "\\1", names(filterDF)[!names(filterDF) %in% drops])
-    types <- c("Additive" = 1, "Subtractive" = 2)[types]
+    types <- setNames(1:2, c(inclusive_logic_name, exclusive_logic_name))[types]
     additive_types <- which(types == 1)     # identify yes-type columns
     subtractive_types <- which(types == 2)  # identify not-type columns
     
@@ -299,7 +307,7 @@ applyFilter <- function(cdataDF, filterDF, cell_unique_id_field = "ucid", truth_
 
 #' Apply shiny-filters to cdata
 #' 
-#' @param filters A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")
+#' @param filters A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Include" or "Exclude")
 #' @param unique_id_fields Vector with the names of the columns which uniquely identify each observation (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).
 #' @inheritParams polyFilterApply
 #' @inheritParams magickCell
@@ -443,7 +451,6 @@ filter_group_pics <- function(cdata,
 #' Useful to check out what areas the filters are covering.
 #'
 #' @param saved_data The output of shinyCell, or a list: \code{list(cdata = NULL, filters = saved_data$filters)}. Note that the only effect of \code{cdata = NULL} is that points will not be drawn.
-# @param .type a string, either "Subtractive" or "Additive", the two types of filters.
 #' @param print_plots Set to false to prevent printing the plots on execution.
 #'
 #' @importFrom rlang parse_expr
@@ -453,7 +460,6 @@ filter_group_pics <- function(cdata,
 #'
 # @examples
 plot_filters <- function(saved_data,
-                         # .type = "Subtractive",
                          print_plots = TRUE){
   
   if(F){
@@ -520,7 +526,6 @@ plot_filters <- function(saved_data,
 #' Unites polygons with matching dimensions. Useful to check out what areas the filters are covering (see \code{plot_bound_filters}).
 #'
 #' @param saved_data The output of shinyCell.
-# @param .type a string, either "Subtractive" or "Additive", the two types of filters.
 #'
 #' @importFrom rlang parse_expr
 #'
@@ -529,7 +534,6 @@ plot_filters <- function(saved_data,
 #'
 # @examples
 bind_filters <- function(saved_data,
-                         # .type = "Subtractive",
                          print_plots = TRUE){
   
   pgnfilters.o <- saved_data$filters %>% 

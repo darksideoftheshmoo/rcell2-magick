@@ -4,10 +4,21 @@
 \alias{polyFilterCell}
 \title{Build filterDF from polygonDF and cdataDF}
 \usage{
-polyFilterCell(cdataDF, filterDF, polygonDF, polygonName = 1)
+polyFilterCell(
+  cdataDF,
+  filterDF,
+  polygonDF,
+  polygonName = 1,
+  inclusive_logic_name = "Include",
+  exclusive_logic_name = "Exclude"
+)
 }
 \arguments{
 \item{cdataDF}{A "cdata" dataframe.}
+
+\item{inclusive_logic_name}{Logic name for the "inclusive" group of filters, selecting their union / inclusive or.}
+
+\item{exclusive_logic_name}{Logic name for the "exclusive" group of filters, selecting the complement of their union.}
 }
 \description{
 Build filterDF from polygonDF and cdataDF

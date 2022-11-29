@@ -86,7 +86,7 @@ This R-Shiny app helps the user browse the dataset graphically.
 }
 \details{
 The filtering logic in the "Filter mode" setting is documented and implemented in \code{\link{polyFilterApply}}.
-Briefly, it defines the priority of Subtractive and Additive filters: which of them should override the other?
+Briefly, it defines the priority of exclusion and inclusion filters: which of them should override the other?
 }
 \examples{
 

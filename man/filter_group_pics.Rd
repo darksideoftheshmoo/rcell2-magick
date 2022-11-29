@@ -20,13 +20,13 @@ filter_group_pics(
 
 \item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
 
-\item{filters}{A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Subtractive" or "Additive")}
+\item{filters}{A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Include" or "Exclude")}
 
 \item{n.cells}{Maximum number of cells to display (integer, set to \code{NULL} to display all cells in \code{cdata}).}
 
 \item{unique_id_fields}{Vector with the names of the columns which uniquely identify each observation (a "primary key") for each data point (i.e. the "ucid" is not suficcient for time series datasets).}
 
-\item{truthMode}{Priority for "Subtractive" and "Additive" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (Subtractive overcomes Additive) or "any" (Additive overcomes Subtractive).}
+\item{truthMode}{Priority for "Exclude" and "Include" polygon filter types, passed to \code{\link{calculateTruth}}. Must be either "all" (exclusion overcomes inclusion) or "any" (inclusion overcomes exclusion).}
 
 \item{strips_or_squares}{Produce strips (TRUE) or square-ish tiles (FALSE). Passed to magickCell's return_single_imgs.}
 

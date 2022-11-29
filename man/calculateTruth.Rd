@@ -8,7 +8,9 @@ calculateTruth(
   filterDF,
   cell_unique_id_field = "ucid",
   truth_column = "filter",
-  mode = "all"
+  mode = "all",
+  inclusive_logic_name = "Include",
+  exclusive_logic_name = "Exclude"
 )
 }
 \arguments{
@@ -16,7 +18,11 @@ calculateTruth(
 
 \item{truth_column}{Name of the column with the boolean filter.}
 
-\item{mode}{Must be either "all" ("Subtractive" overrides "Additive") or "any" ("Additive" overrides "Subtractive").}
+\item{mode}{Filter logic priority. Must be either "all" (exclusion overrides inclusion) or "any" (inclusion overrides exclusion).}
+
+\item{inclusive_logic_name}{Logic name for the "inclusive" group of filters, selecting their union / inclusive or.}
+
+\item{exclusive_logic_name}{Logic name for the "exclusive" group of filters, selecting the complement of their union.}
 }
 \description{
 This function is meant to be called exclusively by \code{\link{polyFilterApply}},

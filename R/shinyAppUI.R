@@ -18,7 +18,7 @@ shinyAppUI <- function(){
              hr(),
 
              p(
-              selectInput(inputId = "filter_type", choices = c("Subtractive", "Additive"),
+              selectInput(inputId = "filter_type", choices = c("Exclude", "Include"),
                           label = "Filter type",
                           width = "100%"),
               actionButton(inputId = "add_filter", label = "Add filter"),
