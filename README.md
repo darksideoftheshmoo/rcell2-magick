@@ -79,7 +79,7 @@ For Ubuntu and Arch Linux these commands may come in handy:
 
 ```sh
 # Aptitude
-sudo apt install imagemagick
+sudo apt install imagemagick libmagick++-dev
 
 # Pacman
 sudo pacman -S imagemagick
