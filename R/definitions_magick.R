@@ -585,7 +585,7 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
 #' @param .debug Print more messages if TRUE.
 #' @param return_single_imgs If TRUE, return a vector of images instead of a tile.
 #' @param return_ucid_df If TRUE, return is a list of magick images and ucid dataframes.
-#' @param annotation_params Set to NULL to skip annotations, or a named list with values for magick::annotate options (one or more of the names "color" "background" "size"). Note that size close to zero can be invisible.
+#' @param annotation_params Set to NULL to skip annotations, or a named list with values of length one for magick::annotate options (i.e. one or more of the names "color" "background" "size"). Note that size close to zero can be invisible.
 #' @param add_border Add a 1x1 border to the pictures. Useful for stacking/appending.
 #' @param stack_vertical_first Set to TRUE to stack images vertically first (useful when \code{return_single_imgs = T}).
 #' @param return_raw Returns loaded images prematurely (i.e. without any processing other than magick::image_read and magick::image_crop).
