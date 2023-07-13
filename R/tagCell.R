@@ -20,7 +20,7 @@
 #' @param normalize_images Use magick's function to "normalize" the images.
 #' @param seed seed for random sampling of images.
 #' @param tmp_output_file File path into which tagging information will be dumped by user request. NULL by default, to automatically create and append to a tmp file.
-#' @param tag_ggplot a ggplot object to display in the second tab, may be used for something someday.
+#' @param tag_ggplot A ggplot created with no data (i.e. only "aes" and a "geom"). It will be passed cdata from the current cell and displayed below. If the x-axis is "t.frame", clicking the plot will jump to the time point nearest to the click.
 #' @param max.frames Max number of t.frames to render in the cell strip. Set to 0 to disable.
 #' @param tags.df Previous tag dataframe, used to restore or view previous tags in the app (restores tags that are named in the cell_tags list).
 #' @param verbose Print debugging messages (with levels at either 0, 1 or 2).

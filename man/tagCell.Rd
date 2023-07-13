@@ -44,7 +44,7 @@ tagCell(
 
 \item{tmp_output_file}{File path into which tagging information will be dumped by user request. NULL by default, to automatically create and append to a tmp file.}
 
-\item{tag_ggplot}{a ggplot object to display in the second tab, may be used for something someday.}
+\item{tag_ggplot}{A ggplot created with no data (i.e. only "aes" and a "geom"). It will be passed cdata from the current cell and displayed below. If the x-axis is "t.frame", clicking the plot will jump to the time point nearest to the click.}
 
 \item{equalize_images}{Use magick's function to "equalize" the images.}
 

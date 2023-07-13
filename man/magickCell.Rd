@@ -61,7 +61,7 @@ magickCell(
 
 \item{return_ucid_df}{If TRUE, return is a list of magick images and ucid dataframes.}
 
-\item{annotation_params}{Set to NULL to skip annotations, or a named list with values for magick::annotate options (one or more of the names "color" "background" "size"). Note that size close to zero can be invisible.}
+\item{annotation_params}{Set to NULL to skip annotations, or a named list with values of length one for magick::annotate options (i.e. one or more of the names "color" "background" "size"). Note that size close to zero can be invisible.}
 
 \item{add_border}{Add a 1x1 border to the pictures. Useful for stacking/appending.}
 
