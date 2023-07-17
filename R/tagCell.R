@@ -13,7 +13,7 @@
 #' @inheritParams shinyCell
 #' @param cell_tags list of named vectors corresponding to tag groups and tags: list(named_item1 = c(option1, option2, ...), named_item2 ...).
 #' @param randomize_ucids Randomize ucid order.
-#' @param tag_box_size Size in pixels of the square crop of the image, around the center of the cell. A larger value is useful for larger or mode lengated cells.
+#' @param tag_box_size Size in pixels of the square crop of the image, around the center of the cell. A larger value is useful for larger or more elongated cells.
 #' @param cell_resize Resize the main image to this value in pixels (integer). NULL by default, it will fill the available horizontal space.
 #' @param tag_channels_select a vector giving names for the image channels: c("BF", "YFP.out", etc....).
 #' @param equalize_images Use magick's function to "equalize" the images.
@@ -21,6 +21,7 @@
 #' @param seed seed for random sampling of images.
 #' @param tmp_output_file File path into which tagging information will be dumped by user request. NULL by default, to automatically create and append to a tmp file.
 #' @param tag_ggplot A ggplot created with no data (i.e. only "aes" and a "geom"). It will be passed cdata from the current cell and displayed below. If the x-axis is "t.frame", clicking the plot will jump to the time point nearest to the click.
+#' @param tag_ggplot_vars Alternative specification of the \code{tag_ggplot} object. Pass a character vector of length two, holding the names of the two variables in \code{cdata} you want to plot.
 #' @param max.frames Max number of t.frames to render in the cell strip. Set to 0 to disable.
 #' @param tags.df Previous tag dataframe, used to restore or view previous tags in the app (restores tags that are named in the cell_tags list).
 #' @param verbose Print debugging messages (with levels at either 0, 1 or 2).
@@ -86,6 +87,7 @@ tagCell <- function(cdata,
                     seed = 1,
                     tmp_output_file=NULL,
                     tag_ggplot = NULL,
+                    tag_ggplot_vars = c("x"="t.frame", "y"="a.tot", "geom"="point"),
                     equalize_images = F,
                     normalize_images = F,
                     # prev.annot.df=NULL,  # TO-DO: implement resume annotations

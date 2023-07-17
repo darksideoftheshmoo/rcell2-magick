@@ -1,3 +1,18 @@
+#' Pop with default operator from StackOverflow
+# Reference: https://stackoverflow.com/a/26561737
+`%or%` = function(a, b) {
+  cmp = function(a,b) if (identical(a, FALSE) ||
+                          is.null(a) ||
+                          is.na(a) ||
+                          is.nan(a) ||
+                          length(a) == 0) b else a
+  
+  if (length(a) > 1)
+    mapply(cmp, a, b)
+  else
+    cmp(a, b)
+}
+
 #' Shiny app server function for tagCell
 #' Define server logic required to draw a histogram
 #' @param input provided by shiny
@@ -777,8 +792,58 @@ tagCellServer <- function(input, output, session) {
     
     # Create basic "tag_ggplot" if not provided
     if(is.null(tag_ggplot)){
-      if(runtime_messages) print("tagCellServer 11: no tag_ggplot object provided, rendering defult plot!")
-      tag_ggplot <- ggplot() + geom_line(aes(x=t.frame, y=a.tot))
+      if(runtime_messages) print("tagCellServer 11: no tag_ggplot object provided, making plot with tag_ggplot_vars.")
+      # Replaced default plot with plot with configurable XY axes.
+      # tag_ggplot <- ggplot() + geom_line(aes(x=t.frame, y=a.tot))
+      
+      # Configurable XY
+      # plot_x_var <- unname(tag_ggplot_vars["x"])
+      # plot_y_var <- unname(tag_ggplot_vars["y"])
+      # tag_ggplot <- ggplot() + geom_line(aes(x=!!sym(plot_x_var), y=!!sym(plot_y_var)))
+
+      # Hadley's alternative with mods:
+      # https://stackoverflow.com/a/3741676
+      # https://stackoverflow.com/a/10269233
+      # aes_now <- function(...) {structure(list(...),  class = "uneval")}
+      # asd <- aes_now(x="asd", y="gfd")
+      # tag_ggplot <- ggplot() + geom_line(do.call("aes_now", as.list(tag_ggplot_vars)))
+      
+      # Example config:
+      # tag_ggplot_vars = c("x"="mpg", "y"="cyl", "geom"="point")
+      
+      # Configurable geom:
+      tag_ggplot_vars <- as.list(tag_ggplot_vars)
+      
+      # Get geom name, and remove it from the parameters.
+      tag_ggplot_geom <- tag_ggplot_vars$geom %or% "point"
+      tag_ggplot_vars$geom <- NULL
+      
+      # Make aesthetics.
+      # tag_ggplot_vars <- lapply(tag_ggplot_vars, function(i) as.formula(paste0("~", i)))  # No anda
+      # my_aes <- do.call("aes_now", tag_ggplot_vars)  # No anda
+      # my_aes <- do.call("aes", tag_ggplot_vars)  # No anda
+      # my_aes <- aes(x=mpg, y=cyl) # Anda
+      # asd <- function(...) aes(...); my_aes <- do.call("asd", tag_ggplot_vars)  # No anda
+      # Example plot.
+      # ggplot(mtcars) + my_geom(mapping = my_aes)
+      
+      # Get geom function
+      tag_ggplot_geom_name <- paste0("geom_", tag_ggplot_geom)
+      my_geom <- get(tag_ggplot_geom_name)
+      
+      # Make plot
+      # This is an awful hack, I could not find a way to set aes parameters by name.
+      # The "do.call" strategy above did not work.
+      tag_ggplot <- ggplot() + my_geom(aes(x = !!sym(tag_ggplot_vars$x %or% ""), 
+                                           y = !!sym(tag_ggplot_vars$y %or% ""), 
+                                           color = !!sym(tag_ggplot_vars$color %or% ""),
+                                           size = !!sym(tag_ggplot_vars$size %or% ""),
+                                           fill = !!sym(tag_ggplot_vars$fill %or% ""),
+                                           alpha = !!sym(tag_ggplot_vars$alpha %or% ""),
+                                           ))
+      
+      # Example data
+      # tag_ggplot %+% mtcars
     }
     
     # Add data
