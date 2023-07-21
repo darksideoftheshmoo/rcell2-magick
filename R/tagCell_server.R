@@ -66,6 +66,7 @@ tagCellServer <- function(input, output, session) {
   
   # Restores selected tags list
   if(!is.null(tags.df)){
+    # Generate tags list from tags.df
     previous.tags.list <- tags.df %>% 
       # remove entries with no t.frame info (i.e. viewed but not tagged cells)
       filter(!is.na(t.frame)) %>% 
@@ -83,6 +84,15 @@ tagCellServer <- function(input, output, session) {
       }) %>% 
       # ensure no empty list items
       {.[lapply(., length) > 0]}
+    # Pickup tagging where it was left off.
+    if(pickup){
+      # Get the ucid of the first non-viewed cell.
+      first_non_viewed <- tags.df$ucid[which(!tags.df$viewed)[1]]
+      # Get the index of that ucid in the "d" dataframe.
+      next_ith_cell <- which(d$ucid == first_non_viewed)[1]
+      # Update the "ith_cell" reactive value to the last viewed cell.
+      reactive_values$ith_cell <- next_ith_cell
+    }
   } else {
     previous.tags.list <- NULL
   }
@@ -168,7 +178,7 @@ tagCellServer <- function(input, output, session) {
     ith_ucid <- as.character(d$ucid[reactive_values$ith_cell])                  # Get ucid for that cell
     ith_t.frame <- as.character(d$t.frame[reactive_values$ith_cell])            # Get t.frame for that cell
     
-    click_t.frame <- closest_to(from_array = d[d$ucid == ith_ucid,]$t.frame,
+    click_t.frame <- closest_to(from_array = d[d$ucid == ith_ucid,][[tag_ggplot_vars["x"]]], # Previously "$t.frame"
                                 closest_to = input$plot_click$x)
     
     if(debug_messages) print(paste("-- Clicked t.frame:", click_t.frame))
@@ -187,10 +197,13 @@ tagCellServer <- function(input, output, session) {
         input[[names(cell_tags)[tag_group]]] ->         # Get the currently selected values array
         ith_cell_tags[[names(cell_tags)[tag_group]]]    # Store it in a list element appropriately named 
       
-      reactive_values$selected_cell_tags[[ith_ucid_t.frame]] <- ith_cell_tags  # Save the tag list to a UCID name element in a reactive values list.
+      # Save the tag list to a UCID name element in a reactive values list.
+      reactive_values$selected_cell_tags[[ith_ucid_t.frame]] <- ith_cell_tags  
       
-      next_ith_cell <- which(d$t.frame == click_t.frame & d$ucid == ith_ucid)  # Get the index row for the clicked t.frame
-      reactive_values$ith_cell <- next_ith_cell                                # Update the ith_cell reactive value
+      # Get the index row for the clicked t.frame.
+      next_ith_cell <- which(d[[ tag_ggplot_vars["x"] ]] == click_t.frame & d$ucid == ith_ucid)  
+      # Update the "ith_cell" reactive value.
+      reactive_values$ith_cell <- next_ith_cell                                
     }
   })
   

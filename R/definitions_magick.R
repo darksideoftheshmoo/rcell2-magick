@@ -274,8 +274,8 @@ cellStrips <- function(cdata,
 #' Names of `l2` absent in `l1` will be ignored, unless `only.common.names=F`.
 #' 
 #' @param l1 List to be updated (with the "original" or "old" values).
-#' @param l2 List used for updating (with the "newer" values). Note: it needn't have all names
-#' @param ... Arguments passed on to magickCell.
+#' @param l2 List used for updating (with the "newer" values). Note: it needn't have all names.
+#' @param only.common.names Names of `l2` absent in `l1` will be ignored, unless `only.common.names=F`.
 #' 
 updateList <- function(l1, l2, only.common.names=T){
   if(!is.list(l2) | !is.list(l1)) stop("Error: input must be two named lists.")

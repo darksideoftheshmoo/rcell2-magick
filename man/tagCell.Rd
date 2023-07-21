@@ -15,12 +15,13 @@ tagCell(
   tag_channels_select = c("BF", "BF.out"),
   seed = 1,
   tmp_output_file = NULL,
+  tag_ggplot_vars = c(x = "t.frame", y = "a.tot", geom = "path"),
   tag_ggplot = NULL,
-  tag_ggplot_vars = c(x = "t.frame", y = "a.tot", geom = "point"),
   equalize_images = F,
   normalize_images = F,
   max.frames = 10,
   tags.df = NULL,
+  pickup = TRUE,
   verbose = 0
 )
 }
@@ -45,9 +46,9 @@ tagCell(
 
 \item{tmp_output_file}{File path into which tagging information will be dumped by user request. NULL by default, to automatically create and append to a tmp file.}
 
-\item{tag_ggplot}{A ggplot created with no data (i.e. only "aes" and a "geom"). It will be passed cdata from the current cell and displayed below. If the x-axis is "t.frame", clicking the plot will jump to the time point nearest to the click.}
+\item{tag_ggplot_vars}{Specification of the \code{tag_ggplot} object. Pass a named character vector, holding the names of the two variables in \code{cdata} you want to plot, named "x" and "y". Optionally include an element named "geom" with the name of the ggplot2 geom to use (e.g. \code{geom="line"}).}
 
-\item{tag_ggplot_vars}{Alternative specification of the \code{tag_ggplot} object. Pass a character vector of length two, holding the names of the two variables in \code{cdata} you want to plot.}
+\item{tag_ggplot}{A ggplot created with no data (i.e. only "aes" and a "geom"). It will be passed cdata from the current cell and displayed below. If the x-axis is "t.frame", clicking the plot will jump to the time point nearest to the click.}
 
 \item{equalize_images}{Use magick's function to "equalize" the images.}
 
@@ -55,7 +56,9 @@ tagCell(
 
 \item{max.frames}{Max number of t.frames to render in the cell strip. Set to 0 to disable.}
 
-\item{tags.df}{Previous tag dataframe, used to restore or view previous tags in the app (restores tags that are named in the cell_tags list).}
+\item{tags.df}{Previous tags dataframe, output by this function. Used to restore or view previous tags in the app (restores tags that are named in the cell_tags list).}
+
+\item{pickup}{Wether to pickup tagging on the next non-viewed ucid, according to tags.df.}
 
 \item{verbose}{Print debugging messages (with levels at either 0, 1 or 2).}
 }

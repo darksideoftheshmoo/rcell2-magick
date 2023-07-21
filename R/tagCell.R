@@ -20,10 +20,11 @@
 #' @param normalize_images Use magick's function to "normalize" the images.
 #' @param seed seed for random sampling of images.
 #' @param tmp_output_file File path into which tagging information will be dumped by user request. NULL by default, to automatically create and append to a tmp file.
+#' @param tag_ggplot_vars Specification of the \code{tag_ggplot} object. Pass a named character vector, holding the names of the two variables in \code{cdata} you want to plot, named "x" and "y". Optionally include an element named "geom" with the name of the ggplot2 geom to use (e.g. \code{geom="line"}).
 #' @param tag_ggplot A ggplot created with no data (i.e. only "aes" and a "geom"). It will be passed cdata from the current cell and displayed below. If the x-axis is "t.frame", clicking the plot will jump to the time point nearest to the click.
-#' @param tag_ggplot_vars Alternative specification of the \code{tag_ggplot} object. Pass a character vector of length two, holding the names of the two variables in \code{cdata} you want to plot.
 #' @param max.frames Max number of t.frames to render in the cell strip. Set to 0 to disable.
-#' @param tags.df Previous tag dataframe, used to restore or view previous tags in the app (restores tags that are named in the cell_tags list).
+#' @param tags.df Previous tags dataframe, output by this function. Used to restore or view previous tags in the app (restores tags that are named in the cell_tags list).
+#' @param pickup Wether to pickup tagging on the next non-viewed ucid, according to tags.df.
 #' @param verbose Print debugging messages (with levels at either 0, 1 or 2).
 # @param n_max max number of boxes in the image.
 # @param ... extra arguments, not used.
@@ -86,15 +87,20 @@ tagCell <- function(cdata,
                     # n_max=10,
                     seed = 1,
                     tmp_output_file=NULL,
+                    tag_ggplot_vars = c(x="t.frame", y="a.tot", geom="path"),
                     tag_ggplot = NULL,
-                    tag_ggplot_vars = c("x"="t.frame", "y"="a.tot", "geom"="point"),
                     equalize_images = F,
                     normalize_images = F,
                     # prev.annot.df=NULL,  # TO-DO: implement resume annotations
                     max.frames=10,
                     tags.df=NULL,
+                    pickup=TRUE,
                     verbose=0
                     ){
+  
+  # Update defaults
+  tag_ggplot_vars_dflt <- c(x="t.frame", y="a.tot", geom="path")
+  tag_ggplot_vars <- updateVector(tag_ggplot_vars_dflt, tag_ggplot_vars)
   
   # Check tags.df  
   if(!is.null(tags.df)){
@@ -259,3 +265,27 @@ tags.to.onehot <- function(tags.df, exclude.cols = c("pos", "cellID", "viewed"))
   
   return(annotations.dt)
 }
+
+
+#' Update a named vector's value using another named vector, by common names.
+#' 
+#' Names of `v2` present in `v1` will update values in `v1`.
+#' 
+#' Names of `v2` absent in `v1` will be ignored, unless `only.common.names=F`.
+#' 
+#' @param v1 List to be updated (with the "original" or "old" values).
+#' @param v2 List used for updating (with the "newer" values). Note: it needn't have all names.
+#' @param only.common.names Names of `v2` absent in `v1` will be ignored, unless `only.common.names=F`.
+#' 
+updateVector <- function(v1, v2, only.common.names=T){
+  if(!is.atomic(v2) | !is.atomic(v1)) stop("Error: input must be two atomic vectors.")
+  
+  if(only.common.names){
+    common.names <- names(v2)[names(v2) %in% names(v1)]
+    v1[common.names] <- v2[common.names]
+  } else{
+    v1[names(v2)] <- v2[names(v2)]
+  }
+  return(v1)
+}
+

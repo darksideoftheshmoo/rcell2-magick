@@ -9,9 +9,9 @@ updateList(l1, l2, only.common.names = T)
 \arguments{
 \item{l1}{List to be updated (with the "original" or "old" values).}
 
-\item{l2}{List used for updating (with the "newer" values). Note: it needn't have all names}
+\item{l2}{List used for updating (with the "newer" values). Note: it needn't have all names.}
 
-\item{...}{Arguments passed on to magickCell.}
+\item{only.common.names}{Names of `l2` absent in `l1` will be ignored, unless `only.common.names=F`.}
 }
 \description{
 Names of `l2` present in `l1` will update values in `l1`.
