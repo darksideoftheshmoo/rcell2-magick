@@ -25,7 +25,8 @@ magickCell(
   add_border = TRUE,
   stack_vertical_first = FALSE,
   return_raw = FALSE,
-  crop_images = TRUE
+  crop_images = TRUE,
+  fill_cdata = FALSE
 )
 }
 \arguments{
@@ -70,6 +71,8 @@ magickCell(
 \item{return_raw}{Returns loaded images prematurely (i.e. without any processing other than magick::image_read and magick::image_crop).}
 
 \item{crop_images}{Whether to crop images to a box centered on the cell's XY position (TRUE, default), or the full image (FALSE).}
+
+\item{fill_cdata}{If TRUE, the time frames in the paths dataframe will be used to generate missing frames in cdata for a given ucid. It is meant to be used with cdata containing one unique ucid.}
 }
 \value{
 A list of two elements: the magick image and the ucids in the image.

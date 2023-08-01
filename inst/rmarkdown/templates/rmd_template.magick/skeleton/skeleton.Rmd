@@ -342,6 +342,20 @@ plts <- cellSpreadPlot(cdata, images, xvar = "a.tot", yvar = "el.p",
 plts$BF.out + ggtitle("This is a ggplot object!")
 ```
 
+Fill missing frames. Inferred frames will have a red border.
+
+```{r}
+a_ucid_with_a_missing_frame = 40013
+
+cdata |> 
+  filter(ucid==a_ucid_with_a_missing_frame) |> 
+  magickCell(images, 
+             fill_cdata = TRUE, #min_frame = min(cdata$t.frame), max_frame = max(cdata$t.frame),
+             return_single_imgs = T) |> 
+  image_append()
+```
+
+
 ### Exported utils
 
 Add a border on only one side of the image:

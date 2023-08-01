@@ -51,6 +51,7 @@ filter_group_pics(
     \item{\code{stack_vertical_first}}{Set to TRUE to stack images vertically first (useful when \code{return_single_imgs = T}).}
     \item{\code{return_raw}}{Returns loaded images prematurely (i.e. without any processing other than magick::image_read and magick::image_crop).}
     \item{\code{crop_images}}{Whether to crop images to a box centered on the cell's XY position (TRUE, default), or the full image (FALSE).}
+    \item{\code{fill_cdata}}{If TRUE, the time frames in the paths dataframe will be used to generate missing frames in cdata for a given ucid. It is meant to be used with cdata containing one unique ucid.}
   }}
 }
 \description{

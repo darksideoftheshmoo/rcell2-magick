@@ -19,6 +19,28 @@ image_border_one <- function (image, geometry = "0x15", color = "white"){
     image_rotate(180)
 }
 
+#' Fill musing frames using tidyr::fill
+#' @param min_frame Fill cdata up from this frame.
+#' @param max_frame Fill cdata up to this frame.
+#' @return cdata object with minimal columns and filled missing frames.
+fill_missing_frames <- function(cdata.one, min_frame=NULL, max_frame=NULL){
+  if(is_null(max_frame)) max_frame <- max(cdata.one$t.frame)
+  if(is_null(min_frame)) min_frame <- min(cdata.one$t.frame)
+  
+  # Minimal info for magickCell
+  cdata.one <- cdata.one |> select(ucid, pos, t.frame, xpos, ypos)
+  
+  # Full t.frame indexes for the cell's range
+  t.frames <- data.frame(t.frame = seq.int(from = min_frame, to = max_frame))
+  
+  # Fill NA values (missed segmentations) with the previous values.
+  cdata.one.filled <- left_join(t.frames, cdata.one, by = "t.frame") |> 
+    mutate(filled_value = is.na(ucid)) |> 
+    tidyr::fill(tidyr::everything(), .direction = 'downup')
+  
+  return(cdata.one.filled)
+}
+
 #' Armar mosaicos cuadrados a partir de un vector de imagenes en magick de cualquier longitud
 #' @param images A magick image vector, with images of the same size preferably.
 #' @param annot_labels A vector with the same lenght as images, holding annotation labels.
@@ -590,6 +612,7 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
 #' @param stack_vertical_first Set to TRUE to stack images vertically first (useful when \code{return_single_imgs = T}).
 #' @param return_raw Returns loaded images prematurely (i.e. without any processing other than magick::image_read and magick::image_crop).
 #' @param crop_images Whether to crop images to a box centered on the cell's XY position (TRUE, default), or the full image (FALSE).
+#' @param fill_cdata If TRUE, the time frames in the paths dataframe will be used to generate missing frames in cdata for a given ucid. It is meant to be used with cdata containing one unique ucid.
 #' @return A list of two elements: the magick image and the ucids in the image.
 # @examples
 # magickCell(cdataFiltered, sample_tiff$file, position = sample_tiff$pos, resize_string = "1000x1000")
@@ -616,7 +639,10 @@ magickCell <- function(cdata, paths,
                        add_border = TRUE,
                        stack_vertical_first = FALSE,
                        return_raw = FALSE,
-                       crop_images = TRUE
+                       crop_images = TRUE,
+                       fill_cdata=FALSE
+                       # min_frame=NULL,
+                       # max_frame=NULL
                        ){
   if(.debug) print("F8")
   if(!nrow(cdata) > 0){
@@ -645,7 +671,13 @@ magickCell <- function(cdata, paths,
              "'\n")
     ))
   }
-  paths <- filter(paths, pos %in% cdata[,"pos", drop = T] & t.frame %in% cdata[,"t.frame", drop = T])
+  
+  # Reduce the images dataframe to the ones actually used.
+  paths <- filter(paths, pos %in% cdata[,"pos", drop = T])
+  paths <- filter(paths, channel %in% ch)
+  if(!isTRUE(fill_cdata)){
+    paths <- filter(paths, t.frame %in% cdata[,"t.frame", drop = T])
+  }
   
   # Add file path column if absent
   if(!"file" %in% names(paths)){
@@ -664,10 +696,6 @@ magickCell <- function(cdata, paths,
   if(!is.null(annotation_params)) 
     annotation_params <- updateList(annotation_params_default, 
                                     annotation_params)
-  
-  # Limit amount of pics to "n.cells"
-  n.cells <- min(c(n.cells, nrow(cdata)))
-  
   # To-do:
   ## Using more than one channel with default options
   ## does not produce the expected output: one square tile per channel.
@@ -682,39 +710,55 @@ magickCell <- function(cdata, paths,
   ## https://rdrr.io/cran/ks/man/binning.html
   ## https://www.rdocumentation.org/packages/npsp/versions/0.7-5/topics/binning
 
-  # Sample the cdata dataframe
+  # Select useful columns only
   cdataSample <- cdata[,unique(c("pos", "xpos", "ypos", "ucid", "t.frame", sortVar))]  # keep only the necessary columns
+  
+  # Fill missing t.frames reusing xy positions of prev/next rows.
+  if(isTRUE(fill_cdata)){
+    cdataSample <- fill_missing_frames(cdataSample, 
+                                       min_frame=min(paths$t.frame), 
+                                       max_frame=max(paths$t.frame))
+  }
+  
+  # Limit amount of pics to "n.cells"
+  n.cells <- min(c(n.cells, nrow(cdataSample)))
   
   # Set seed if specified, and sample "n.cells" from the dataframe
   if(!is.null(seed)){ 
     set.seed(seed)
     # Sample
-    cdataSample <- cdata[sample(1:nrow(cdata), size = n.cells, replace = F),] # sample n.cells rows from cdata
+    cdataSample <- cdataSample[sample(1:nrow(cdataSample), size = n.cells, replace = F),] # sample n.cells rows from cdata
   } else {
     # Else, just take the first "n.cells" rows
     # This was possibly missing: not subsetting of cdata caused all images to be loaded,
     # even though only a few "n.cells" had been requested. This seems to make magickCell much faster (not really tested).
-    cdataSample <- cdata[1:n.cells,]
+    cdataSample <- cdataSample[1:n.cells,]
   }
+  
   # Sort cdata
   if(!is.null(sortVar)) cdataSample <- cdataSample[order(cdataSample[[sortVar]]),]  # sort the sample by "sortVar"
-
+  
+  # Load and annotate images into a magick images object.
   imga <-
     foreach::foreach(i=1:nrow(cdataSample), .combine=c) %do% {
-  
+      
+      # Get the current cell's metadata.
       position <- cdataSample$pos[i]
       ucid <- cdataSample$ucid[i]
       t_frame <- cdataSample$t.frame[i]
       picPath.df <- subset(paths, pos == position & channel %in% ch & t.frame == t_frame)
       picPath <- picPath.df$file[order(match(picPath.df$channel, ch))]  # order paths according to ch argument
       
-      stopifnot(length(position) == 1 &length(ucid) == 1 &length(t_frame) == 1) # Checks
-      stopifnot(length(picPath) == length(ch) & is.character(picPath)) # Checks
+      # Checks
+      stopifnot(length(position) == 1 & length(ucid) == 1 & length(t_frame) == 1)
+      stopifnot(length(picPath) == length(ch) & is.character(picPath))
       
+      # Load the full image.
       imgs.raw <- 
         # Read images
         magick::image_read(picPath) %>%
-        # Add arrow if requested:
+        
+        # Add arrow pointing to a cell if requested:
         {
           if(!is.null(annotation_params$arrow_color)){
             magick::image_annotate(image = .,
@@ -753,8 +797,6 @@ magickCell <- function(cdata, paths,
             normalize_images_rep <- rep(normalize_images, length.out = length(ch))
             customize_images_rep <- rep(customize_images, length.out = length(ch))
             
-            # browser()
-
             # Equalize images jointly or separately
             if(length(equalize_images) == 1){
               if(equalize_images[1]) .imgs <- image_equalize(.imgs)
@@ -781,6 +823,7 @@ magickCell <- function(cdata, paths,
             # Return
             .imgs
           } %>%
+          
           # Add square black box background, forcing all to at least the same boxSize:
           {
             if(crop_images){
@@ -790,10 +833,12 @@ magickCell <- function(cdata, paths,
                 gravity = "Center")
             } else {.}
           } %>% 
+          
           # Resize
           {
             if(crop_images) {magick::image_scale(., cell_resize_string)} else {.}
           } %>%
+          
           # Annotate pos, t.frame and channel
           {
             if(is.null(annotation_params)) {.} else { 
@@ -820,10 +865,24 @@ magickCell <- function(cdata, paths,
                                      gravity = "NorthWest")
             }
           } %>%
+          
           # Add 1x1 black border
           {
-            if(isTRUE(add_border)){magick::image_border(., "black","1x1")} else {.}
+            # Deal with the dot mystery
+            .imgs <- .
+            # Add borders
+            if(isTRUE(add_border)){
+              if(isTRUE(fill_cdata)){
+                # Add black
+                image_border(image = .imgs,
+                             geometry = "1x1",
+                             color = c("black", "red")[cdataSample$filled_value[i]+1])
+              } else {
+                magick::image_border(.imgs, "black","1x1")
+              }
+            } else {.imgs}
           } %>% 
+          
           # Tile horizontally
           magick::image_append(stack = stack_vertical_first)
         
