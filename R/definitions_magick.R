@@ -19,24 +19,33 @@ image_border_one <- function (image, geometry = "0x15", color = "white"){
     image_rotate(180)
 }
 
-#' Fill musing frames using tidyr::fill
-#' @param min_frame Fill cdata up from this frame.
-#' @param max_frame Fill cdata up to this frame.
+#' Fill missing frames using tidyr::fill
+#' 
+#' Adds "dummy" rows to cdata, filling in any discontinuities in the t.frame column. This can happen when a cell is not segmented every frame.
+#' 
+#' @param min_frame Fill cdata from this frame and up. Later frames will be discarded.
+#' @param max_frame Fill cdata up to this frame.  Previous frames will be discarded.
+#' @param cleanup_cols Remove columns not used by magickCell.
+#' @export
 #' @return cdata object with minimal columns and filled missing frames.
-fill_missing_frames <- function(cdata.one, min_frame=NULL, max_frame=NULL){
-  if(is_null(max_frame)) max_frame <- max(cdata.one$t.frame)
-  if(is_null(min_frame)) min_frame <- min(cdata.one$t.frame)
+fill_missing_frames <- function(cdata.one, min_frame=NULL, max_frame=NULL, cleanup_cols=FALSE){
+  if(is.null(max_frame)) max_frame <- max(cdata.one$t.frame)
+  if(is.null(min_frame)) min_frame <- min(cdata.one$t.frame)
   
   # Minimal info for magickCell
-  cdata.one <- cdata.one |> select(ucid, pos, t.frame, xpos, ypos)
+  if(cleanup_cols) cdata.one <- cdata.one |> select(ucid, pos, t.frame, xpos, ypos)
   
-  # Full t.frame indexes for the cell's range
-  t.frames <- data.frame(t.frame = seq.int(from = min_frame, to = max_frame))
+  # Full t.frame indexes for the cell's range.
+  # Use the most extreme values in t.frame information.
+  t.frames <- data.frame(t.frame = seq.int(from = min(min_frame, cdata.one$t.frame), 
+                                           to = max(max_frame, cdata.one$t.frame)))
   
   # Fill NA values (missed segmentations) with the previous values.
   cdata.one.filled <- left_join(t.frames, cdata.one, by = "t.frame") |> 
     mutate(filled_value = is.na(ucid)) |> 
-    tidyr::fill(tidyr::everything(), .direction = 'downup')
+    tidyr::fill(tidyr::everything(), .direction = 'downup') |> 
+    # Frames are selected here.
+    filter(t.frame >= min_frame, t.frame <= max_frame)
   
   return(cdata.one.filled)
 }
@@ -717,7 +726,8 @@ magickCell <- function(cdata, paths,
   if(isTRUE(fill_cdata)){
     cdataSample <- fill_missing_frames(cdataSample, 
                                        min_frame=min(paths$t.frame), 
-                                       max_frame=max(paths$t.frame))
+                                       max_frame=max(paths$t.frame), 
+                                       cleanup_cols = F)
   }
   
   # Limit amount of pics to "n.cells"

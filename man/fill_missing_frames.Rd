@@ -2,18 +2,25 @@
 % Please edit documentation in R/definitions_magick.R
 \name{fill_missing_frames}
 \alias{fill_missing_frames}
-\title{Fill musing frames using tidyr::fill}
+\title{Fill missing frames using tidyr::fill}
 \usage{
-fill_missing_frames(cdata.one, min_frame = NULL, max_frame = NULL)
+fill_missing_frames(
+  cdata.one,
+  min_frame = NULL,
+  max_frame = NULL,
+  cleanup_cols = FALSE
+)
 }
 \arguments{
-\item{min_frame}{Fill cdata up from this frame.}
+\item{min_frame}{Fill cdata from this frame and up. Later frames will be discarded.}
 
-\item{max_frame}{Fill cdata up to this frame.}
+\item{max_frame}{Fill cdata up to this frame.  Previous frames will be discarded.}
+
+\item{cleanup_cols}{Remove columns not used by magickCell.}
 }
 \value{
 cdata object with minimal columns and filled missing frames.
 }
 \description{
-Fill musing frames using tidyr::fill
+Adds "dummy" rows to cdata, filling in any discontinuities in the t.frame column. This can happen when a cell is not segmented every frame.
 }
