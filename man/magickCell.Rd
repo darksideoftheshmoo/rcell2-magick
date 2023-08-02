@@ -26,7 +26,8 @@ magickCell(
   stack_vertical_first = FALSE,
   return_raw = FALSE,
   crop_images = TRUE,
-  fill_cdata = FALSE
+  fill_cdata = FALSE,
+  highlight_fames = FALSE
 )
 }
 \arguments{
@@ -73,6 +74,8 @@ magickCell(
 \item{crop_images}{Whether to crop images to a box centered on the cell's XY position (TRUE, default), or the full image (FALSE).}
 
 \item{fill_cdata}{If TRUE, the time frames in the paths dataframe will be used to generate missing frames in cdata for a given ucid. It is meant to be used with cdata containing one unique ucid.}
+
+\item{highlight_fames}{Pass an array of t.frames, and the cells with matching frames will be highlighted with a yellow border yellow. This overrides other highlights.}
 }
 \value{
 A list of two elements: the magick image and the ucids in the image.
