@@ -355,6 +355,15 @@ cdata |>
   image_append()
 ```
 
+Any set of frames can be highlighted with a yellow border:
+
+```{r}
+cdata |> 
+  magickCell(images,
+             highlight_fames = 2,
+             return_single_imgs = T) |> 
+  image_append()
+```
 
 ### Exported utils
 
