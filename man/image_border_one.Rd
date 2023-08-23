@@ -4,7 +4,7 @@
 \alias{image_border_one}
 \title{Add a border to one side of the image}
 \usage{
-image_border_one(image, geometry = "0x15", color = "white")
+image_border_one(image, geometry = "0x15", color = "white", flip = F)
 }
 \arguments{
 \item{image}{magick image object.}
@@ -12,6 +12,8 @@ image_border_one(image, geometry = "0x15", color = "white")
 \item{geometry}{From \code{?image_border}: A geometry string to set height and width of the border, e.g. "10x8". The default value adds a 15px border to the top of the image.}
 
 \item{color}{color string for the border background.}
+
+\item{flip}{Flip the side where the border ends up.}
 }
 \value{
 Image magick object with borders

@@ -7,16 +7,17 @@
 #' @param image magick image object.
 #' @param geometry From \code{?image_border}: A geometry string to set height and width of the border, e.g. "10x8". The default value adds a 15px border to the top of the image.
 #' @param color color string for the border background.
+#' @param flip Flip the side where the border ends up.
 #' @export
 #' @return Image magick object with borders
-image_border_one <- function (image, geometry = "0x15", color = "white"){
-  image %>% 
-    # Add a border
-    image_border(color = color, geometry = geometry) %>% 
+image_border_one <- function (image, geometry = "0x15", color = "white", flip = F) {
+  # Add a border
+  image |> 
+    image_rotate(180*flip) |>
+    image_border(color = color, geometry = geometry) |> 
     # image_chop removes vertical or horizontal subregion of image.
-    image_rotate(180) %>% 
-    image_chop(geometry = geometry) %>% 
-    image_rotate(180)
+    image_rotate(180) %>% image_chop(geometry = geometry) |> image_rotate(180) |> 
+    image_rotate(180*flip)
 }
 
 #' Fill missing frames using tidyr::fill
