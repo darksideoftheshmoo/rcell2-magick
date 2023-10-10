@@ -10,8 +10,8 @@ cellMagick(...)
 \item{...}{
   Arguments passed on to \code{\link[=magickCell]{magickCell}}
   \describe{
-    \item{\code{cdata}}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
-    \item{\code{paths}}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+    \item{\code{cdata}}{A "cdata" data.frame with the Cell-ID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{get_cell_data} or \code{load_cell_data}.}
+    \item{\code{paths}}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{get_cell_data} or \code{load_cell_data}.}
     \item{\code{max_composite_size}}{Maximum size of the final composite image (this resize is applied last) in pixels. 1000 by default.}
     \item{\code{cell_resize}}{Resize string for the individual cell images (\code{NULL} translates to \code{boxSize}x\code{boxSize} by default).}
     \item{\code{boxSize}}{Lateral size of the square box extracted from the original images (in pixels). 50 px by default.}

@@ -56,7 +56,7 @@ safe_select <- function(.df, .name){
 #' 
 #' path <- "/path/to_your/cellid_images/"
 #' 
-#' cell.data <- rcell2::cell.load.alt(path = path)
+#' cell.data <- rcell2::get_cell_data(path = path)
 #' 
 #' cdata <- cell.data$data  # CellID dataframe
 #' 

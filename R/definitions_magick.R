@@ -601,8 +601,8 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
 #' $ is.out  <lgl> FALSE
 #' }
 #'
-#' @param cdata A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
-#' @param paths A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.
+#' @param cdata A "cdata" data.frame with the Cell-ID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{get_cell_data} or \code{load_cell_data}.
+#' @param paths A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{get_cell_data} or \code{load_cell_data}.
 #' @param max_composite_size Maximum size of the final composite image (this resize is applied last) in pixels. 1000 by default.
 #' @param cell_resize Resize string for the individual cell images (\code{NULL} translates to \code{boxSize}x\code{boxSize} by default).
 #' @param boxSize Lateral size of the square box extracted from the original images (in pixels). 50 px by default.

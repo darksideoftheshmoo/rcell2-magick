@@ -12,7 +12,7 @@ apply_filters(
 )
 }
 \arguments{
-\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+\item{cdata}{A "cdata" data.frame with the Cell-ID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{get_cell_data} or \code{load_cell_data}.}
 
 \item{filters}{A list of polygon dataframes with columns: x (values) y (values) xvar (variable name for x values) yvar (variable name for y values) type ("Include" or "Exclude")}
 
