@@ -264,6 +264,53 @@ pics <-
 pics %>% magickForKnitr()
 ```
 
+Missing frames in cdata can be drawn by guessing the cell's position based on its previous or later positions.
+The missing frames are highlighted in red.
+
+```{r}
+# Load two image channels, but customize them differently:
+pics <- 
+  cdata |> filter(ucid == 40002) |> 
+  magickCell(images, ch = c("BF.out", "yfp"),
+             normalize_images = c(F, T), 
+             
+             # Fill missing frames in cdata.
+             fill_cdata = T, 
+             
+             # Adjust how channels are stacked and images are returned.
+             stack_vertical_first = T,
+             return_single_imgs = T
+  )
+
+pics |> 
+  magick::image_append() |> 
+  magickForKnitr()
+```
+
+Certain frames can be highlighted automatically:
+
+```{r}
+# Load two image channels, but customize them differently:
+pics <- 
+  cdata |> 
+  # Select a cell.
+  filter(ucid == 40000) |> 
+  magickCell(images, ch = c("BF.out", "yfp"),
+             normalize_images = c(F, T), 
+             
+             # Highlight frames in yellow.
+             highlight_fames = 1,             
+             
+             # Adjust how channels are stacked and images are returned.
+             stack_vertical_first = T,
+             return_single_imgs = T
+  )
+
+pics |> 
+  magick::image_append() |> 
+  magickForKnitr()
+```
+
 ### Advanced functions
 
 A strip:
