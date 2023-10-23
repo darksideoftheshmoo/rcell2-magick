@@ -26,9 +26,9 @@ shinyCell(
 )
 }
 \arguments{
-\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+\item{cdata}{A "cdata" data.frame with the Cell-ID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{get_cell_data} or \code{load_cell_data}.}
 
-\item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+\item{paths}{A "paths" data.frame, with paths to the images (i.e. \code{cell.data$images}), and t.frame, position and channel information of each one. It can be obtained from \code{get_cell_data} or \code{load_cell_data}.}
 
 \item{pdata}{An optional "pdata" data.frame, with positions' metadata (NULL by default).}
 
@@ -96,7 +96,7 @@ Briefly, it defines the priority of exclusion and inclusion filters: which of th
 
 path <- "/path/to_your/cellid_images/"
 
-cell.data <- rcell2::cell.load.alt(path = path)
+cell.data <- rcell2::get_cell_data(path = path)
 
 cdata <- cell.data$data  # CellID dataframe
 

@@ -9,7 +9,7 @@ hover_closest(ui_input, cdata)
 \arguments{
 \item{ui_input}{the "input" object from whiny server}
 
-\item{cdata}{A "cdata" data.frame with the CellID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{cell.load.alt} or \code{load_cell_data}.}
+\item{cdata}{A "cdata" data.frame with the Cell-ID variables (not the cell.data object, \code{cell.data$data}). It can be obtained from \code{get_cell_data} or \code{load_cell_data}.}
 }
 \description{
 Find cell closest to hover point in shiny

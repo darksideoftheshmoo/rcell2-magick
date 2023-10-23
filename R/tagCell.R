@@ -32,7 +32,7 @@
 #' @examples
 #' path <- "/mac/apesta/trololololol/"
 #' 
-#' cell.data <- rcell2::cell.load.alt(path = path)
+#' cell.data <- rcell2::get_cell_data(path = path)
 #' 
 #' image.paths <- cell.data$d.paths  # Si usaste load_cell es: image.paths <- rcell2::magickPaths(cell.data)
 #' 

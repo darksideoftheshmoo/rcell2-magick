@@ -115,7 +115,7 @@ rcell2.cellid::get_workflow_template_cellid()
 
 This section requires either the `rcell2` or the `rcell2.cellid` package.
 
-You need only to point `load_cell_data` or `cell.load.alt` to the directory
+You need only to point `load_cell_data` or `get_cell_data` to the directory
 where images and the Cell-ID output are located.
 
 The following example loads the example dataset of the previous section.
@@ -123,7 +123,7 @@ The following example loads the example dataset of the previous section.
 ```{r}
 # Load Cell-ID's output
 # cell_data <- rcell2::load_cell_data(data.dir)
-cell_data <- rcell2.cellid::cell.load.alt(data.dir)
+cell_data <- rcell2.cellid::get_cell_data(data.dir)
 
 # Get the table with single-cell measurements
 cdata <- cell_data$data
