@@ -42,7 +42,8 @@ Imports:
     shinyjs,
     rlang,
     data.table,
-    keys
+    keys,
+    shinycssloaders
 Suggests: 
     tidyverse,
     skimr
