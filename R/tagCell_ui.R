@@ -33,7 +33,7 @@ tagCellUi <- function(){shiny::fluidPage(shinyjs::useShinyjs(),  # Set up shinyj
                                                           height = "100%",
                                                           width = "100%"
                                                           # height = "auto", width = "auto")
-                                        ) |> shinycssloaders::withSpinner(type = 7, size = 0.5, color = "#eaeaea", hide.ui = F)
+                                        ) |> shinycssloaders::withSpinner(type = 7, size = 0.5, color = "#eaeaea", hide.ui = T)
                                       )
                                     ),
                                     shiny::p(verbatimTextOutput("hover_info")),
@@ -51,7 +51,7 @@ tagCellUi <- function(){shiny::fluidPage(shinyjs::useShinyjs(),  # Set up shinyj
                                         # shiny::plotOutput(outputId = "pics2",
                                                           # height = "100%",
                                                           # width = "100%"
-                                        ) |> shinycssloaders::withSpinner(type = 7, size = 0.5, color = "#eaeaea", hide.ui = F)
+                                        ) |> shinycssloaders::withSpinner(type = 7, size = 0.5, color = "#eaeaea", hide.ui = T)
                                       )
                                     )
                                     ),
