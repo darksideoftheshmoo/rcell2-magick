@@ -723,7 +723,8 @@ tagCellServer <- function(input, output, session) {
                    ch=tag_channels_select, 
                    equalize_images = equalize_images,
                    normalize_images = normalize_images,
-                   boxSize = tag_box_size, 
+                   boxSize = tag_box_size,
+                   highlight_fames = frame.selected
                    ) %>% 
         # Unlist the output
         .[[1]]
