@@ -55,7 +55,7 @@ magickCell(
 
 \item{sortVar}{Variable name used to sort the rows (after sampling if a \code{seed} was specified). NULL by default, to skip sorting.}
 
-\item{seed}{Seed value for sampling of cell images. NULL by default, to disable sampling.}
+\item{seed}{Seed value for sampling of cell images, passed to \code{set.seed}. Set to \code{NULL} by default, which disables sampling. Note that the state of the RNG is restored on exit (see \code{on.exit}).}
 
 \item{.debug}{Print more messages if TRUE.}
 

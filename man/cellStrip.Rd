@@ -45,7 +45,7 @@ cellStrip(
     \item{\code{image_customize}}{A custom magick-like function to "customize" the channels specified in \code{customize_images}. Defaults to NULL (disabled).}
     \item{\code{ch}}{Name of the CellID channel (BF, BF.out, RFP, etc.). "BF.out" by default, use a vector to select more than one channel simultaneously (images will be stacked).}
     \item{\code{sortVar}}{Variable name used to sort the rows (after sampling if a \code{seed} was specified). NULL by default, to skip sorting.}
-    \item{\code{seed}}{Seed value for sampling of cell images. NULL by default, to disable sampling.}
+    \item{\code{seed}}{Seed value for sampling of cell images, passed to \code{set.seed}. Set to \code{NULL} by default, which disables sampling. Note that the state of the RNG is restored on exit (see \code{on.exit}).}
     \item{\code{.debug}}{Print more messages if TRUE.}
     \item{\code{return_single_imgs}}{If TRUE, return a vector of images instead of a tile.}
     \item{\code{return_ucid_df}}{If TRUE, return is a list of magick images and ucid dataframes.}

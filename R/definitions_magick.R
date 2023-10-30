@@ -613,7 +613,7 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
 #' @param image_customize A custom magick-like function to "customize" the channels specified in \code{customize_images}. Defaults to NULL (disabled).
 #' @param ch Name of the CellID channel (BF, BF.out, RFP, etc.). "BF.out" by default, use a vector to select more than one channel simultaneously (images will be stacked).
 #' @param sortVar Variable name used to sort the rows (after sampling if a \code{seed} was specified). NULL by default, to skip sorting.
-#' @param seed Seed value for sampling of cell images. NULL by default, to disable sampling.
+#' @param seed Seed value for sampling of cell images, passed to \code{set.seed}. Set to \code{NULL} by default, which disables sampling. Note that the state of the RNG is restored on exit (see \code{on.exit}).
 #' @param .debug Print more messages if TRUE.
 #' @param return_single_imgs If TRUE, return a vector of images instead of a tile.
 #' @param return_ucid_df If TRUE, return is a list of magick images and ucid dataframes.
@@ -740,6 +740,10 @@ magickCell <- function(cdata, paths,
   
   # Set seed if specified, and sample "n.cells" from the dataframe
   if(!is.null(seed)){ 
+    # Save and restore the seed on exit.
+    old.seed <- .Random.seed
+    on.exit( { .Random.seed <<- old.seed } )
+    # Set the supllied seed.
     set.seed(seed)
     # Sample
     cdataSample <- cdataSample[sample(1:nrow(cdataSample), size = n.cells, replace = F),] # sample n.cells rows from cdata

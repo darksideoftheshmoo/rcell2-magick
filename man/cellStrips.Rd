@@ -41,7 +41,7 @@ cellStrips(
     \item{\code{normalize_images}}{Use magick's function to "normalize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).}
     \item{\code{customize_images}}{Use a custom magick-like function to "customize" the image when TRUE (FALSE by default). Can be a logical vector, each value applied separately to each channel (recycled to the length of \code{ch}).}
     \item{\code{image_customize}}{A custom magick-like function to "customize" the channels specified in \code{customize_images}. Defaults to NULL (disabled).}
-    \item{\code{seed}}{Seed value for sampling of cell images. NULL by default, to disable sampling.}
+    \item{\code{seed}}{Seed value for sampling of cell images, passed to \code{set.seed}. Set to \code{NULL} by default, which disables sampling. Note that the state of the RNG is restored on exit (see \code{on.exit}).}
     \item{\code{.debug}}{Print more messages if TRUE.}
     \item{\code{return_single_imgs}}{If TRUE, return a vector of images instead of a tile.}
     \item{\code{return_ucid_df}}{If TRUE, return is a list of magick images and ucid dataframes.}
