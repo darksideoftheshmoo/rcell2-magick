@@ -10,7 +10,7 @@ get_workflow_template_magick <- function(
     file_name = "rcell2.magick_workflow_template.Rmd",
     open.template = T){
   
-  if(file.exists(file_name)) stop("get_workflow_template error: file", file_name, "exists.")
+  if(file.exists(file_name)) stop("get_workflow_template error: file ", file_name, " already exists.")
   
   workflow.file <- system.file(
     "rmarkdown/templates/rmd_template.magick/skeleton/skeleton.Rmd",

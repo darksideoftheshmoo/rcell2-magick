@@ -25,6 +25,21 @@ bibliography: references.bib
 
 <!-- Download a copy of this file with rcell2::get_workflow_template() -->
 
+## Installation
+
+The `rcell2.magick` package can be installed directly from [its git repository](https://github.com/darksideoftheshmoo/rcell2-magick) by running the following:
+
+```{r}
+# The remotes package is required to install R packages from git.
+if (!requireNamespace("remotes", quietly = TRUE))
+  install.packages("remotes")
+
+# Our lab's GitHub organizacion lives at https://github.com/darksideoftheshmoo/
+remotes::install_github("darksideoftheshmoo/rcell2-magick")
+```
+
+## Notebook Setup
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T,
                       message = F, 

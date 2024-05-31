@@ -58,13 +58,14 @@ shinyAppServer <-
     }
     
     # Handy functions ####
-    make_filter_polygon_df <- function(x, y, xvar, yvar, type){
+    make_filter_polygon_df <- function(x, y, xvar, yvar, type, stringsAsFactors = F){
+      writeLines("\n-- make_filter_polygon_df: making brushed points dataframe.")
       brpts <- data.frame(x = x,
                           y = y,
                           xvar = xvar,
                           yvar = yvar,
                           type = type,
-                          stringsAsFactors = F)
+                          stringsAsFactors = stringsAsFactors)
       return(brpts)
     }
 
@@ -694,7 +695,7 @@ shinyAppServer <-
         # Observe clicks and add them to the polygon dataframe
         eventExpr = input$vertex1,  ## Double clicks
         handlerExpr = {
-          writeLines("\nDoublelick event: Polygon point added")
+          writeLines("\n-- Doublelick event: Polygon point added.")
           # Isolation may be futile in "observeEvent" contexts.
           
           # https://stackoverflow.com/questions/30588472/is-it-possible-to-clear-the-brushed-area-of-a-plot-in-shiny
@@ -705,15 +706,17 @@ shinyAppServer <-
           pgnpts <- isolate(rv$pgnpts)  # will fire on click, isolation is prudent
           
           # Make df with the new polygon point
-          new_pgnpts <- make_filter_polygon_df(x = isolate(input$vertex1$x),
-                                               y = isolate(input$vertex1$y),
-                                               xvar = isolate(input$x),
-                                               yvar = isolate(input$y),
+          writeLines("\n-- Doublelick event: making filter polygon.")
+          new_pgnpts <- make_filter_polygon_df(x = input$vertex1$x,
+                                               y = input$vertex1$y,
+                                               xvar = input$x,
+                                               yvar = input$y,
                                                # Filter type will be overwritten when the add filter button is pressed
                                                type = input$filter_type,
                                                stringsAsFactors = F)
           
           # Add a new row with the new point
+          writeLines("\n-- Doublelick event: adding row to pgnpts")
           if(nrow(pgnpts) == 0){
             # Either create the dataframe
             pgnpts <- new_pgnpts
@@ -723,6 +726,7 @@ shinyAppServer <-
           }
           
           # Update the reactive object
+          writeLines("\n-- Doublelick event: updating polygon points.")
           rv$pgnpts <- pgnpts
 
         }, label = "Click observer 1")
