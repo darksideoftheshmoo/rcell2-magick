@@ -2,6 +2,7 @@
 % Please edit documentation in R/rcell2.magick.R
 \docType{package}
 \name{rcell2.magick}
+\alias{rcell2.magick-package}
 \alias{rcell2.magick}
 \title{Yeast Cell Cytometry Suite for CellID in R.}
 \description{
@@ -40,4 +41,13 @@ If you already have CellID in your system, you are welcome to use it instead of 
 
 \seealso{
 \link{magick}
+}
+\author{
+\strong{Maintainer}: Nicolás Agustín Méndez \email{nmendez.ar@gmail.com}
+
+Authors:
+\itemize{
+  \item German Beldorati Stark \email{gerbeldo@gmail.com}
+}
+
 }

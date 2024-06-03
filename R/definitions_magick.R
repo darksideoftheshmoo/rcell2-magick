@@ -623,7 +623,7 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
 #' @param return_raw Returns loaded images prematurely (i.e. without any processing other than magick::image_read and magick::image_crop).
 #' @param crop_images Whether to crop images to a box centered on the cell's XY position (TRUE, default), or the full image (FALSE).
 #' @param fill_cdata If TRUE, the time frames in the paths dataframe will be used to generate missing frames in cdata for a given ucid. It is meant to be used with cdata containing one unique ucid.
-#' @param highlight_fames Pass an array of t.frames, and the cells with matching frames will be highlighted with a yellow border yellow. This overrides other highlights.
+#' @param highlight_frames Pass an array of t.frames, and the cells with matching frames will be highlighted with a yellow border yellow. This overrides other highlights.
 #' @return A list of two elements: the magick image and the ucids in the image.
 # @examples
 # magickCell(cdataFiltered, sample_tiff$file, position = sample_tiff$pos, resize_string = "1000x1000")
@@ -652,7 +652,7 @@ magickCell <- function(cdata, paths,
                        return_raw = FALSE,
                        crop_images = TRUE,
                        fill_cdata=FALSE,
-                       highlight_fames = FALSE
+                       highlight_frames = FALSE
                        # min_frame=NULL,
                        # max_frame=NULL
 ){
@@ -666,7 +666,7 @@ magickCell <- function(cdata, paths,
     return(NULL)
   }
   
-  if(isFALSE(highlight_fames)) highlight_fames <- c()
+  if(isFALSE(highlight_frames)) highlight_frames <- c()
   
   # "100x100" pixels
   if(is.null(cell_resize)) cell_resize <- boxSize
@@ -877,7 +877,7 @@ magickCell <- function(cdata, paths,
           # Add borders
           if(isTRUE(add_border)){
             # Highlight
-            if(t_frame %in% highlight_fames){
+            if(t_frame %in% highlight_frames){
               magick::image_border(.imgs, "yellow","1x1")
             } else if(isTRUE(fill_cdata)){
               # Add black

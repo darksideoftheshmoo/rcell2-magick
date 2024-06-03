@@ -314,7 +314,7 @@ pics <-
              normalize_images = c(F, T), 
              
              # Highlight frames in yellow.
-             highlight_fames = 1,             
+             highlight_frames = 1,             
              
              # Adjust how channels are stacked and images are returned.
              stack_vertical_first = T,
@@ -422,7 +422,7 @@ Any set of frames can be highlighted with a yellow border:
 ```{r}
 cdata |> 
   magickCell(images,
-             highlight_fames = 2,
+             highlight_frames = 2,
              return_single_imgs = T) |> 
   image_append()
 ```
