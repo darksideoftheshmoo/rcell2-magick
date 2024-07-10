@@ -35,7 +35,8 @@ if (!requireNamespace("remotes", quietly = TRUE))
   install.packages("remotes")
 
 # Our lab's GitHub organizacion lives at https://github.com/darksideoftheshmoo/
-remotes::install_github("darksideoftheshmoo/rcell2-magick")
+if (!requireNamespace("rcell2.magick", quietly = TRUE))
+  remotes::install_github("darksideoftheshmoo/rcell2-magick")
 ```
 
 ## Notebook Setup
