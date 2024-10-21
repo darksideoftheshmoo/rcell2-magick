@@ -591,7 +591,9 @@ x_to_ranges <- function(x){
 #' Get a monospaced font family name
 #' Defaults to an empty string if no monospaced fonts are found.
 get_monospaced_font_family <- function(mfonts) {
-  # Filter the dataframe for font families that are monospaced
+  # Get fonts.
+  mfonts <- magick::magick_fonts()
+  # Filter the dataframe for font families that are monospaced.
   monospaced_fonts <- mfonts %>%
     dplyr::filter(grepl("Mono|Monospace|Hack", family, ignore.case = TRUE)) %>%
     dplyr::distinct(family)
