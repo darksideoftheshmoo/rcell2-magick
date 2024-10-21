@@ -576,6 +576,34 @@ getCellGeom <- function(xpos, ypos, boxSize = 50){
   return(geometry)
 }
 
+#' Make a string of ranges from a vector of integer numbers
+x_to_ranges <- function(x){
+  x_sorted <- x |> sort() |> unique()
+  d <- cumsum(c(0, diff(x_sorted) - 1))
+  r <- split(x_sorted,d) |> lapply(range) |> 
+    lapply(unique) |> 
+    lapply(paste, collapse="-") |> 
+    unlist() |> unname() |> 
+    paste(collapse = ", ")
+  return(r)
+}
+
+#' Get a monospaced font family name
+#' Defaults to an empty string if no monospaced fonts are found.
+get_monospaced_font_family <- function(mfonts) {
+  # Filter the dataframe for font families that are monospaced
+  monospaced_fonts <- mfonts %>%
+    dplyr::filter(grepl("Mono|Monospace|Hack", family, ignore.case = TRUE)) %>%
+    dplyr::distinct(family)
+  
+  # Return the distinct family names
+  monostpaced_families <- monospaced_fonts$family |> unique()
+
+    # Default to empty string.
+  if(length(monostpaced_families) < 1) monostpaced_families <- ""
+
+  return(monostpaced_families[1])
+}
 
 #' Funcion copada para mostrar fotos de Cell-ID basada en magick
 #' 
@@ -666,6 +694,13 @@ magickCell <- function(cdata, paths,
     return(NULL)
   }
   
+  # Check for missing paths.
+  posframes <- cdata |> select(pos, t.frame) |> unique()
+  missing_paths <- posframes |> dplyr::anti_join(paths, by = join_by(pos, t.frame))
+  if(nrow(missing_paths) > 0) stop(paste("The paths dataframe is missing images for cells in frames", x_to_ranges(missing_paths$t.frame), 
+                                         "and positions", x_to_ranges(missing_paths$pos)
+                                         ))
+  
   if(isFALSE(highlight_frames)) highlight_frames <- c()
   
   # "100x100" pixels
@@ -704,6 +739,7 @@ magickCell <- function(cdata, paths,
                                    background = "black",
                                    size = cell_resize/7,
                                    arrow_color = NULL,
+                                   font = get_monospaced_font_family(),
                                    arrow_text = sprintf('\u2191'),
                                    arrow_size = 50, 
                                    arrow_angle = 45)
@@ -769,8 +805,12 @@ magickCell <- function(cdata, paths,
       picPath <- picPath.df$file[order(match(picPath.df$channel, ch))]  # order paths according to ch argument
       
       # Checks
-      stopifnot(length(position) == 1 & length(ucid) == 1 & length(t_frame) == 1)
-      stopifnot(length(picPath) == length(ch) & is.character(picPath))
+      if(length(position) != 1) stop("Length of position was", length(position), "instead of 1.")
+      if(length(ucid) != 1) stop("Length of ucid was", length(ucid), "instead of 1.")
+      if(length(t_frame) != 1) stop("Length of t_frame was", length(t_frame), "instead of 1.")
+      if(length(picPath) == 0) stop(paste("No images in the paths data frame were found for ucid", ucid, "frame", t_frame, "and channel", ch))
+      if(length(picPath) != length(ch)) stop(paste("Mismatch between the number of requested channels and available paths."))
+      if(!is.character(picPath)) stop("The path is not of type character, and cannot be used.")
       
       # Load the full image.
       imgs.raw <- 
@@ -857,7 +897,7 @@ magickCell <- function(cdata, paths,
                                    color = annotation_params[["color"]],
                                    boxcolor = annotation_params[["background"]],
                                    size = annotation_params[["size"]],
-                                   font = "Comic sans",
+                                   font = annotation_params[["font"]],
                                    gravity = "SouthEast")
           }
         } %>% { # Annotate ucid
@@ -867,7 +907,7 @@ magickCell <- function(cdata, paths,
                                    color = annotation_params[["color"]],
                                    boxcolor = annotation_params[["background"]],
                                    size = annotation_params[["size"]],
-                                   font = "Comic sans",
+                                   font = annotation_params[["font"]],
                                    gravity = "NorthWest")
           } else {.}
           
