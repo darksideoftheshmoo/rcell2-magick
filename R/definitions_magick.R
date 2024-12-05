@@ -368,18 +368,11 @@ cellSpread <- function(cdata, paths,
   cdata.binned$y_bins <- cut(y_data, breaks = y.breaks, 
                              ordered_result=T, dig.lab = 2, include.lowest = T)  #, labels = 1:y.cuts)  # labels = FALSE
   
-  # cdata.binned %>% group_by(x_bins,
-  #                           y_bins) %>% 
-  #   sample_n(1) %>% select(ucid, t.frame, x_bins, y_bins) %>% 
-  #   arrange(desc(y_bins), x_bins)
-  
   blank_image <- magick::image_blank(boxSize, boxSize, color = "black") %>% 
     magick::image_annotate(text = "NA", gravity = "Center", color = "white") %>% 
     magick::image_border("green","1x1")
   
   cell_tile_array <- blank_image  # initialize
-  
-  # n_pics <- y.cuts*x.cuts
   
   for(channel in ch){
     # Formas rapidas de crecer una lista
@@ -392,7 +385,6 @@ cellSpread <- function(cdata, paths,
         row_level <- rev(levels(cdata.binned$y_bins))[row_i]
         col_level <- levels(cdata.binned$x_bins)[col_i]
         
-        # cdata.bin <- cdata.binned[cdata.binned$x_bins == col_level & cdata.binned$y_bins == row_level,]
         cdata.bin <- subset(cdata.binned, x_bins == col_level & y_bins == row_level)
         cdata.bin_n <- nrow(cdata.bin)
         
@@ -697,7 +689,7 @@ magickCell <- function(cdata, paths,
   }
   
   # Check for missing paths.
-  posframes <- cdata |> select(pos, t.frame) |> unique()
+  posframes <- cdata |> ungroup() |> select(pos, t.frame) |> unique()
   missing_paths <- posframes |> dplyr::anti_join(paths, by = join_by(pos, t.frame))
   if(nrow(missing_paths) > 0) stop(paste("The paths dataframe is missing images for cells in frames", x_to_ranges(missing_paths$t.frame), 
                                          "and positions", x_to_ranges(missing_paths$pos)

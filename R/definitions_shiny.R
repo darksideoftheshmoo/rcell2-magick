@@ -470,14 +470,14 @@ plot_filters <- function(saved_data,
   pgnfilters.o <- saved_data$filters %>% 
     bind_rows(.id = "polygon")
   
-  pgn.vars <- pgnfilters.o %>% select(xvar, yvar) %>% unique() #%>% bind_rows(data.frame(xvar = "el.p", yvar="a.tot"))
+  pgn.vars <- pgnfilters.o |> ungroup() |> select(xvar, yvar) |> unique() #%>% bind_rows(data.frame(xvar = "el.p", yvar="a.tot"))
   
   # variables <- pgn.vars %>% select(xvar, yvar) %>% plyr::adply(.margins = 1, function(x){
   #   var_names <- c(xvar=x$xvar, yvar=x$yvar)
   #   var_names[order(var_names)]
   # }) %>% unique()
   
-  variables <- pgn.vars %>% select(xvar, yvar) %>% 
+  variables <- pgn.vars |> ungroup() |> select(xvar, yvar) %>% 
     apply(MARGIN = 1, FUN = function(x) setNames(x[order(x)], names(x)), simplify = F) %>% 
     bind_rows() %>% unique()
     
@@ -539,13 +539,13 @@ bind_filters <- function(saved_data,
   pgnfilters.o <- saved_data$filters %>% 
     bind_rows(.id = "polygon") # %>% filter(type == .type)
   
-  pgn.vars <- pgnfilters.o %>% select(xvar, yvar) %>% unique() #%>% bind_rows(data.frame(xvar = "el.p", yvar="a.tot"))
+  pgn.vars <- pgnfilters.o |> ungroup() |> select(xvar, yvar) |> unique() #%>% bind_rows(data.frame(xvar = "el.p", yvar="a.tot"))
   
   # variables <- pgn.vars %>% select(xvar, yvar) %>% plyr::adply(.margins = 1, function(x){
   #   var_names <- c(xvar=x$xvar, yvar=x$yvar)
   #   var_names[order(var_names)]
   # }) %>% unique()
-  variables <- pgn.vars %>% select(xvar, yvar) %>% 
+  variables <- pgn.vars %>% select(xvar, yvar) %>% ungroup() |> 
     apply(MARGIN = 1, FUN = function(x) setNames(x[order(x)], names(x)), simplify = F) %>% 
     bind_rows() %>% unique()
   
