@@ -71,9 +71,28 @@ The magick functions display single cell images from microscopy datasets. See:
 
 Most of the dependencies are listed in the `DESCRIPTION` file, and should install automatically.
 
+In a Mac OS computer, the binary `magick` package may fail to annotate images, with the following error message:
+
+```
+Error: rsession-arm64: NonconformingDrawingPrimitiveDefinition `text' @ error/draw.c/RenderMVGContent/4456
+```
+
+To fix this, re-install the `magick` package "from source". This requires the ImageMagick library to be installed in your system, as described below.
+
 ### System dependencies
 
-Install `imagemagick` on your system; this is required by R's `magick` package. All the major operating systems are supported by ImageMagick. See: https://imagemagick.org/script/download.php
+Install `imagemagick` on your system; this is required by R's `magick` package. All the major operating systems are supported by ImageMagick. See: <https://imagemagick.org/script/download.php>
+
+#### macOS
+
+To install ImageMagick in macOS you will need to:
+
+- Install the `brew` package manager: <https://brew.sh/>
+- Use brew to install the `imagemagick@6` package: <https://github.com/ropensci/magick#installation>
+
+More information at: <https://imagemagick.org/script/download.php>
+
+#### Linux
 
 For Ubuntu and Arch Linux these commands may come in handy:
 
@@ -85,11 +104,9 @@ sudo apt install imagemagick libmagick++-dev
 sudo pacman -S imagemagick
 ```
 
-For macOS see: https://imagemagick.org/script/download.php
-
 ### Installing the package
 
-Install using `remotes`, directly from github repo:
+Install the package using `remotes`. This will fetch the latest version directly from its GitHub repository:
 
 ```r
 remotes::install_github("darksideoftheshmoo/rcell2-magick")
